@@ -1,110 +1,42 @@
 [
   {
-    "id": "de_hs_24J67O_11A4_1780132365904_532",
-    "title": "de_hs_24J67O",
-    "week": "1",
+    "id": "de_hs_11A4",
+    "title": "Ôn tập Hàm số",
+    "grade": "11",
     "class": "11A4",
+    "week": "2026-W01",
     "open": "2026-05-30",
-    "close": "2026-06-30",
+    "close": "2026-07-04",
     "html": "de_hs_24J67O.html"
   },
   {
-    "id": "de_hs_24J67O_11A5_1780132365904_770",
-    "title": "de_hs_24J67O",
-    "week": "1",
-    "class": "11A5",
-    "open": "2026-05-30",
-    "close": "2026-06-30",
-    "html": "de_hs_24J67O.html"
-  },
-  {
-    "id": "de_hs_EXFQTDD_11A4_1780132365904_22",
-    "title": "de_hs_EXFQTDD",
-    "week": "1",
+    "id": "de_daoham_11A4",
+    "title": "Đạo hàm",
+    "grade": "11",
     "class": "11A4",
-    "open": "2026-05-30",
-    "close": "2026-06-30",
-    "html": "de_hs_EXFQTDD.html"
+    "week": "2026-W02",
+    "open": "2026-06-02",
+    "close": "2026-06-09",
+    "html": "de_daoham.html"
   },
   {
-    "id": "de_hs_EXFQTDD_11A5_1780132365904_127",
-    "title": "de_hs_EXFQTDD",
-    "week": "1",
-    "class": "11A5",
-    "open": "2026-05-30",
-    "close": "2026-06-30",
-    "html": "de_hs_EXFQTDD.html"
+    "id": "ontn_cd1_12A1",
+    "title": "Ôn TN - Chuyên đề 1",
+    "grade": "ontn",
+    "class": "12A1",
+    "week": "2026-W10",
+    "open": "2026-07-01",
+    "close": "2026-07-30",
+    "html": "ontn_cd1.html"
   },
   {
-    "id": "de_hs_EXYB5CR_11A4_1780132365904_677",
-    "title": "de_hs_EXYB5CR",
-    "week": "1",
-    "class": "11A4",
-    "open": "2026-05-30",
-    "close": "2026-06-30",
-    "html": "de_hs_EXYB5CR.html"
-  },
-  {
-    "id": "de_hs_EXYB5CR_11A5_1780132365904_831",
-    "title": "de_hs_EXYB5CR",
-    "week": "1",
-    "class": "11A5",
-    "open": "2026-05-30",
-    "close": "2026-06-30",
-    "html": "de_hs_EXYB5CR.html"
-  },
-  {
-    "id": "de_hs_UQE7QA_11A4_1780132365904_545",
-    "title": "de_hs_UQE7QA",
-    "week": "1",
-    "class": "11A4",
-    "open": "2026-05-30",
-    "close": "2026-06-30",
-    "html": "de_hs_UQE7QA.html"
-  },
-  {
-    "id": "de_hs_UQE7QA_11A5_1780132365904_759",
-    "title": "de_hs_UQE7QA",
-    "week": "1",
-    "class": "11A5",
-    "open": "2026-05-30",
-    "close": "2026-06-30",
-    "html": "de_hs_UQE7QA.html"
-  },
-  {
-    "id": "de_hs_VRNZ4P_11A4_1780132365904_955",
-    "title": "de_hs_VRNZ4P",
-    "week": "1",
-    "class": "11A4",
-    "open": "2026-05-30",
-    "close": "2026-06-30",
-    "html": "de_hs_VRNZ4P.html"
-  },
-  {
-    "id": "de_hs_VRNZ4P_11A5_1780132365904_46",
-    "title": "de_hs_VRNZ4P",
-    "week": "1",
-    "class": "11A5",
-    "open": "2026-05-30",
-    "close": "2026-06-30",
-    "html": "de_hs_VRNZ4P.html"
-  },
-  {
-    "id": "de_hs_XOKWP2_11A4_1780132365904_105",
-    "title": "de_hs_XOKWP2",
-    "week": "1",
-    "class": "11A4",
-    "open": "2026-05-30",
-    "close": "2026-06-30",
-    "html": "de_hs_XOKWP2.html"
-  },
-  {
-    "id": "de_hs_XOKWP2_11A5_1780132365904_280",
-    "title": "de_hs_XOKWP2",
-    "week": "1",
-    "class": "11A5",
-    "open": "2026-05-30",
-    "close": "2026-06-30",
-    "html": "de_hs_XOKWP2.html"
+    "id": "thithu_lan1_12A1",
+    "title": "Thi thử lần 1",
+    "grade": "thithu",
+    "class": "12A1",
+    "week": "2026-W15",
+    "open": "2026-08-10",
+    "close": "2026-08-10",
+    "html": "thithu_lan1.html"
   }
 ]

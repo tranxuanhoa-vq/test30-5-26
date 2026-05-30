@@ -27,19 +27,12 @@
 <h1>📊 LMS Mini – Dashboard Giáo viên</h1>
 <div class="card">
     <div class="flex-row">
-        <div class="file-group">
-            <label><strong>1. File kết quả bài làm (Excel/CSV)</strong><br>
-            <input type="file" id="resultFile" accept=".xlsx, .xls, .csv, .xlsm"></label>
-        </div>
-        <div class="file-group">
-            <label><strong>2. File danh sách lớp (có cột 'Lớp' và 'Tên HS')</strong><br>
-            <input type="file" id="rosterFile" accept=".xlsx, .xls, .csv"></label>
-        </div>
+        <div class="file-group"><label><strong>1. File kết quả bài làm (Excel)</strong><br><input type="file" id="resultFile" accept=".xlsx, .xls, .csv"></label></div>
+        <div class="file-group"><label><strong>2. File danh sách lớp (cột 'Lớp' và 'Tên HS')</strong><br><input type="file" id="rosterFile" accept=".xlsx, .xls, .csv"></label></div>
         <div><button id="generateBtn">📈 Tạo bảng thống kê</button></div>
     </div>
     <div id="status" class="badge">Chưa có dữ liệu</div>
 </div>
-
 <div id="statsTableContainer" style="overflow-x: auto;"></div>
 <div id="absentPanel" style="display: none;" class="card">
     <h2>📋 Theo dõi bỏ bài & Nhắc nhở phụ huynh</h2>
@@ -48,9 +41,7 @@
 </div>
 
 <script>
-    let resultData = [];
-    let classRoster = new Map();
-
+    let resultData = [], classRoster = new Map();
     function readFile(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -65,18 +56,13 @@
             reader.readAsArrayBuffer(file);
         });
     }
-
     function processResultRows(rows) {
         const headers = rows.length ? Object.keys(rows[0]) : [];
         const timestampCol = headers.find(h => h.includes("Dấu thời gian") || h.toLowerCase().includes("timestamp")) || headers[0];
         const nameCol = headers.find(h => h.includes("Tên HS") || h === "Tên HS");
         const scoreCol = headers.find(h => h === "Điểm" || h.includes("Điểm"));
         if (!nameCol) throw new Error("Không tìm thấy cột 'Tên HS'");
-        
-        const valid = rows.filter(row => {
-            let name = row[nameCol];
-            return name && typeof name === "string" && name.includes("_");
-        });
+        const valid = rows.filter(row => row[nameCol] && row[nameCol].includes("_"));
         valid.sort((a,b) => new Date(a[timestampCol]) - new Date(b[timestampCol]));
         const latestMap = new Map();
         for (const row of valid) {
@@ -90,24 +76,19 @@
         }
         return Array.from(latestMap.values());
     }
-
     function processRosterRows(rows) {
         const headers = rows.length ? Object.keys(rows[0]) : [];
         const classCol = headers.find(h => h === "Lớp" || h.toLowerCase() === "lop");
         const nameCol = headers.find(h => h === "Tên HS" || h === "Họ tên" || h.toLowerCase().includes("tên"));
-        if (!classCol || !nameCol) throw new Error("File danh sách cần có cột 'Lớp' và 'Tên HS'");
+        if (!classCol || !nameCol) throw new Error("File danh sách cần cột 'Lớp' và 'Tên HS'");
         const roster = new Map();
         for (const row of rows) {
             let lop = row[classCol]?.toString().trim();
             let ten = row[nameCol]?.toString().trim();
-            if (lop && ten) {
-                if (!roster.has(lop)) roster.set(lop, new Set());
-                roster.get(lop).add(ten);
-            }
+            if (lop && ten) { if (!roster.has(lop)) roster.set(lop, new Set()); roster.get(lop).add(ten); }
         }
         return roster;
     }
-
     function getScoreRange(score) {
         if (score <= 1.0) return "≤1.0";
         if (score <= 2.0) return "1.0<2.0";
@@ -118,132 +99,73 @@
         if (score <= 9.0) return "8<9";
         return "9<10";
     }
-
     function generateStats() {
-        if (!resultData.length) {
-            document.getElementById("statsTableContainer").innerHTML = '<div class="card">⚠️ Chưa có dữ liệu kết quả bài làm.</div>';
-            document.getElementById("absentPanel").style.display = "none";
-            return;
-        }
+        if (!resultData.length) { document.getElementById("statsTableContainer").innerHTML = '<div class="card">⚠️ Chưa có dữ liệu kết quả.</div>'; return; }
         const classScores = new Map();
-        for (let item of resultData) {
-            if (!classScores.has(item.lop)) classScores.set(item.lop, []);
-            classScores.get(item.lop).push(item.score);
-        }
-        
+        for (let item of resultData) { if (!classScores.has(item.lop)) classScores.set(item.lop, []); classScores.get(item.lop).push(item.score); }
         const allClasses = new Set([...classScores.keys(), ...classRoster.keys()]);
         const sortedClasses = Array.from(allClasses).sort();
         const ranges = ["≤1.0", "1.0<2.0", "2.0<3.5", "3.5<5.0", "5<6.5", "6.5<8", "8<9", "9<10"];
-        
-        let html = `<div class="card"><h2>📋 THỐNG KÊ ĐIỂM THI THEO LẦN</h2>
-        <table>
-            <thead>
-                <tr><th>MÔN</th><th>Lớp</th><th>Sĩ số</th>${ranges.map(r => `<th>${r}<br>SL</th>`).join('')}<th>Lần điểm ≥5</th><th>Điểm TB</th></tr>
-                <tr style="border-top:2px solid #aaa;"><td colspan="3"></td>${ranges.map(() => `<th>SL</th>`).join('')}<th>SL</th><th>%</th><th></th></tr>
-            </thead>
-            <tbody>`;
-        
+        let html = `<div class="card"><h2>📋 THỐNG KÊ ĐIỂM THI THEO LẦN</h2>`
+            + `<table><thead><tr><th>MÔN</th><th>Lớp</th><th>Sĩ số</th>${ranges.map(r=>`<th>${r}<br>SL</th>`).join('')}<th>Lần điểm ≥5</th><th>Điểm TB</th></tr>`
+            + `<tr><td colspan="3">...</td>${ranges.map(()=>`<th>SL</th>`).join('')}<th>SL</th><th>%</th><th></th></tr></thead><tbody>`;
         let totalAll = { count:0, sum:0, totalStudents:0, rangeCounts: new Array(ranges.length).fill(0), ge5Count:0 };
-        
         for (let lop of sortedClasses) {
             const scores = classScores.get(lop) || [];
             const rosterSet = classRoster.get(lop);
             const siSo = rosterSet ? rosterSet.size : (scores.length > 0 ? scores.length : 0);
             const rangeCount = new Array(ranges.length).fill(0);
             let sum = 0;
-            for (let s of scores) {
-                sum += s;
-                const range = getScoreRange(s);
-                const idx = ranges.indexOf(range);
-                if (idx !== -1) rangeCount[idx]++;
-            }
+            for (let s of scores) { sum += s; const idx = ranges.indexOf(getScoreRange(s)); if (idx!==-1) rangeCount[idx]++; }
             const soLuong = scores.length;
-            const ge5 = scores.filter(s => s >= 5).length;
-            const percentGe5 = soLuong ? ((ge5 / soLuong) * 100).toFixed(2) : "0.00";
-            const avg = soLuong ? (sum / soLuong).toFixed(2) : "0.00";
-            
-            totalAll.count += soLuong;
-            totalAll.sum += sum;
-            totalAll.totalStudents += siSo;
-            for (let i=0; i<ranges.length; i++) totalAll.rangeCounts[i] += rangeCount[i];
+            const ge5 = scores.filter(s=>s>=5).length;
+            const percentGe5 = soLuong ? ((ge5/soLuong)*100).toFixed(2) : "0.00";
+            const avg = soLuong ? (sum/soLuong).toFixed(2) : "0.00";
+            totalAll.count += soLuong; totalAll.sum += sum; totalAll.totalStudents += siSo;
+            for (let i=0;i<ranges.length;i++) totalAll.rangeCounts[i] += rangeCount[i];
             totalAll.ge5Count += ge5;
-            
-            html += `<tr><td>Toán</td><td>${lop}</td><td>${siSo}</td>${rangeCount.map(c => `<td>${c}</td>`).join('')}<td>${ge5}</td><td>${percentGe5}%</td><td>${avg}</td></tr>`;
+            html += `<tr><td>Toán</td><td>${lop}</td><td>${siSo}</td>${rangeCount.map(c=>`<td>${c}</td>`).join('')}<td>${ge5}</td><td>${percentGe5}%</td><td>${avg}</td></tr>`;
         }
-        
-        const totalAvg = totalAll.count ? (totalAll.sum / totalAll.count).toFixed(2) : "0.00";
-        const totalPercentGe5 = totalAll.count ? ((totalAll.ge5Count / totalAll.count) * 100).toFixed(2) : "0.00";
-        html += `<tr class="total-row"><td colspan="2"><strong>Tổng</strong></td><td><strong>${totalAll.totalStudents}</strong></td>${totalAll.rangeCounts.map(c => `<td><strong>${c}</strong></td>`).join('')}<td><strong>${totalAll.ge5Count}</strong></td><td><strong>${totalPercentGe5}%</strong></td><td><strong>${totalAvg}</strong></td></tr>`;
-        html += `</tbody></table><div class="note">* Sĩ số từ danh sách lớp (nếu có). Nếu không, sĩ số = số HS đã làm trong lớp.<br>Khoảng điểm: ≤1.0 ; 1.0<2.0 ; 2.0<3.5 ; 3.5<5.0 ; 5<6.5 ; 6.5<8 ; 8<9 ; 9<10.</div></div>`;
+        const totalAvg = totalAll.count ? (totalAll.sum/totalAll.count).toFixed(2) : "0.00";
+        const totalPercentGe5 = totalAll.count ? ((totalAll.ge5Count/totalAll.count)*100).toFixed(2) : "0.00";
+        html += `<tr class="total-row"><td colspan="2"><strong>Tổng</strong></td><td><strong>${totalAll.totalStudents}</strong></td>${totalAll.rangeCounts.map(c=>`<td><strong>${c}</strong></td>`).join('')}<td><strong>${totalAll.ge5Count}</strong></td><td><strong>${totalPercentGe5}%</strong></td><td><strong>${totalAvg}</strong></td></tr>`;
+        html += `</tbody></table><div class="note">* Sĩ số từ danh sách lớp (nếu có). Nếu không, sĩ số = số HS đã làm. Khoảng điểm theo quy định.</div></div>`;
         document.getElementById("statsTableContainer").innerHTML = html;
-        
-        // Phần bỏ bài & nhắc nhở
+        // Bỏ bài
         if (classRoster.size > 0) {
             const notDoneMap = new Map();
             for (let [lop, students] of classRoster.entries()) {
-                const doneSet = new Set((classScores.get(lop) || []).map(s => s.ten));
-                const notDone = Array.from(students).filter(name => !doneSet.has(name));
+                const doneSet = new Set((classScores.get(lop) || []).map(s=>s.ten));
+                const notDone = Array.from(students).filter(name=>!doneSet.has(name));
                 if (notDone.length) notDoneMap.set(lop, notDone);
             }
-            if (notDoneMap.size === 0) {
-                document.getElementById("absentResult").innerHTML = `<div class="badge">✅ Tất cả học sinh trong danh sách đều đã làm bài.</div>`;
-                document.getElementById("reminderBox").innerHTML = "";
-                document.getElementById("absentPanel").style.display = "block";
-                return;
+            if (notDoneMap.size === 0) { document.getElementById("absentResult").innerHTML = `<div class="badge">✅ Tất cả học sinh đã làm bài.</div>`; document.getElementById("reminderBox").innerHTML = ""; }
+            else {
+                let htmlAbsent = "", allReminders = "";
+                for (let [lop, notDone] of notDoneMap.entries()) {
+                    htmlAbsent += `<div class="warning"><strong>⚠️ Lớp ${lop}:</strong> ${notDone.length} HS chưa làm:<br> ${notDone.join(", ")}</div>`;
+                    notDone.forEach(name => { allReminders += `Kính gửi PHHS em ${name} (lớp ${lop}).\nĐến thời điểm hiện tại, em chưa hoàn thành bài tập. Đề nghị gia đình nhắc nhở.\nTrân trọng.\n\n`; });
+                }
+                document.getElementById("absentResult").innerHTML = htmlAbsent;
+                document.getElementById("reminderBox").innerHTML = `<textarea rows="10" style="width:100%">${allReminders}</textarea><p>📋 Sao chép để gửi Zalo/Email.</p>`;
             }
-            let htmlAbsent = "";
-            let allReminders = "";
-            for (let [lop, notDone] of notDoneMap.entries()) {
-                htmlAbsent += `<div class="warning"><strong>⚠️ Lớp ${lop}:</strong> ${notDone.length} học sinh chưa làm:<br> ${notDone.join(", ")}</div>`;
-                notDone.forEach(name => {
-                    allReminders += `Kính gửi PHHS em ${name} (lớp ${lop}).\nĐến thời điểm hiện tại, em chưa hoàn thành bài tập trực tuyến. Đề nghị gia đình phối hợp nhắc nhở.\nTrân trọng.\n\n`;
-                });
-            }
-            document.getElementById("absentResult").innerHTML = htmlAbsent;
-            document.getElementById("reminderBox").innerHTML = `<textarea rows="10" style="width:100%">${allReminders}</textarea><p>📋 Sao chép nội dung trên để gửi Zalo/Email.</p>`;
             document.getElementById("absentPanel").style.display = "block";
-        } else {
-            document.getElementById("absentPanel").style.display = "none";
-        }
+        } else { document.getElementById("absentPanel").style.display = "none"; }
     }
-    
-    let resultFileLoaded = false, rosterFileLoaded = false;
-    document.getElementById("resultFile").addEventListener("change", async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        document.getElementById("status").innerHTML = "Đang đọc file kết quả...";
-        try {
-            const rows = await readFile(file);
-            resultData = processResultRows(rows);
-            resultFileLoaded = true;
-            document.getElementById("status").innerHTML = `✅ Đã đọc: ${resultData.length} học sinh có bài làm (lần cuối).`;
-            if (rosterFileLoaded) generateStats();
-        } catch(err) {
-            alert("Lỗi: " + err.message);
-            document.getElementById("status").innerHTML = "❌ Lỗi file kết quả";
-        }
-    });
-    
-    document.getElementById("rosterFile").addEventListener("change", async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        document.getElementById("status").innerHTML = "Đang đọc danh sách lớp...";
-        try {
-            const rows = await readFile(file);
-            classRoster = processRosterRows(rows);
-            rosterFileLoaded = true;
-            document.getElementById("status").innerHTML = `✅ Đã đọc danh sách: ${classRoster.size} lớp.`;
-            if (resultFileLoaded) generateStats();
-        } catch(err) {
-            alert("Lỗi: " + err.message);
-            document.getElementById("status").innerHTML = "❌ Lỗi file danh sách";
-        }
-    });
-    
-    document.getElementById("generateBtn").addEventListener("click", () => {
-        if (!resultFileLoaded) { alert("Vui lòng upload file kết quả trước."); return; }
-        generateStats();
-    });
+    let resultFileLoaded=false, rosterFileLoaded=false;
+    document.getElementById("resultFile").onchange = async (e)=>{
+        const file=e.target.files[0]; if(!file) return;
+        document.getElementById("status").innerHTML="Đang đọc kết quả...";
+        try{ const rows=await readFile(file); resultData=processResultRows(rows); resultFileLoaded=true; document.getElementById("status").innerHTML=`✅ Đã đọc: ${resultData.length} học sinh có bài làm.`; if(rosterFileLoaded) generateStats(); }
+        catch(err){ alert("Lỗi: "+err.message); document.getElementById("status").innerHTML="❌ Lỗi file kết quả"; }
+    };
+    document.getElementById("rosterFile").onchange = async (e)=>{
+        const file=e.target.files[0]; if(!file) return;
+        document.getElementById("status").innerHTML="Đang đọc danh sách lớp...";
+        try{ const rows=await readFile(file); classRoster=processRosterRows(rows); rosterFileLoaded=true; document.getElementById("status").innerHTML=`✅ Đã đọc danh sách: ${classRoster.size} lớp.`; if(resultFileLoaded) generateStats(); }
+        catch(err){ alert("Lỗi: "+err.message); document.getElementById("status").innerHTML="❌ Lỗi danh sách"; }
+    };
+    document.getElementById("generateBtn").onclick = ()=>{ if(!resultFileLoaded) alert("Vui lòng upload file kết quả trước."); else generateStats(); };
 </script>
 </body>
 </html>

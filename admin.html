@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản trị đề thi - Thêm nhiều đề cùng lúc</title>
+    <title>Quản trị đề - Thêm nhiều đề cùng lúc</title>
     <style>
         body { font-family: system-ui; max-width: 1200px; margin: 0 auto; padding: 20px; background: #f5f7fb; }
         .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -11,211 +11,108 @@
         .checkbox-group { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 8px; }
         .checkbox-group label { display: inline-flex; align-items: center; gap: 5px; font-weight: normal; margin-top: 0; }
         button { background: #1e3c72; color: white; padding: 10px 20px; border: none; border-radius: 8px; margin-top: 20px; cursor: pointer; }
-        button.danger { background: #c0392b; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background: #e2e8f0; }
         .warning { background: #fff3cd; padding: 12px; border-radius: 8px; margin-top: 15px; }
-        .success { background: #d4edda; padding: 12px; border-radius: 8px; margin-top: 15px; }
+        .success { background: #d4edda; padding: 12px; border-radius: 8px; }
         .file-list { background: #f0f0f0; padding: 10px; border-radius: 8px; margin-top: 10px; }
     </style>
 </head>
 <body>
 <h1>🛠 Quản trị kho đề - Thêm nhiều đề cùng lúc</h1>
-
 <div class="card">
     <h2>📋 Danh sách đề hiện có</h2>
     <div id="examList">Đang tải...</div>
-    <button id="refreshListBtn" style="background: #27ae60;">🔄 Làm mới từ exams.json</button>
-    <button id="downloadCurrentBtn" style="background: #2980b9; margin-left: 10px;">💾 Tải exams.json hiện tại</button>
+    <button id="refreshListBtn" style="background:#27ae60;">🔄 Làm mới</button>
+    <button id="downloadCurrentBtn" style="background:#2980b9; margin-left:10px;">💾 Tải exams.json hiện tại</button>
 </div>
-
 <div class="card">
     <h2>➕ Thêm nhiều đề mới (chọn nhiều file HTML)</h2>
     <label>Lớp áp dụng * (chọn một hoặc nhiều)</label>
     <div class="checkbox-group" id="classCheckboxes">
-        <label><input type="checkbox" value="11A4"> 11A4</label>
-        <label><input type="checkbox" value="11A5"> 11A5</label>
-        <label><input type="checkbox" value="11A6"> 11A6</label>
-        <label><input type="checkbox" value="11A7"> 11A7</label>
-        <label><input type="checkbox" value="12A1"> 12A1</label>
-        <label><input type="checkbox" value="12A2"> 12A2</label>
+        <label><input type="checkbox" value="10"> Lớp 10</label>
+        <label><input type="checkbox" value="11"> Lớp 11</label>
+        <label><input type="checkbox" value="12"> Lớp 12</label>
     </div>
-
-    <label>Tuần (VD: 2026-W01) - chung</label>
+    <label>Tuần (chung)</label>
     <input type="text" id="week" placeholder="2026-W01">
-
-    <label>Ngày mở (YYYY-MM-DD) * - chung</label>
+    <label>Ngày mở (YYYY-MM-DD) *</label>
     <input type="date" id="open">
-
-    <label>Ngày đóng (YYYY-MM-DD) * - chung</label>
+    <label>Ngày đóng (YYYY-MM-DD) *</label>
     <input type="date" id="close">
-
-    <label>Chọn nhiều file HTML đề (mỗi file sẽ tạo một đề riêng)</label>
+    <label>Chọn nhiều file HTML đề (mỗi file tạo một đề)</label>
     <input type="file" id="htmlFiles" accept=".html" multiple>
-
     <div id="selectedFilesList" class="file-list" style="display:none;"></div>
-
-    <button id="addMultipleBtn">➕ Thêm nhiều đề (giữ nguyên đề cũ)</button>
-    <div class="warning">⚠️ Mỗi file HTML sẽ tạo một đề riêng, áp dụng cho tất cả các lớp đã chọn. Tiêu đề đề mặc định lấy từ tên file (bỏ .html). Bạn có thể sửa lại trong file exams.json sau khi tải về.</div>
+    <button id="addMultipleBtn">➕ Thêm đề & Xuất exams.json (cũ + mới)</button>
+    <div class="warning">⚠️ Mỗi file HTML sẽ tạo một đề riêng, áp dụng cho tất cả lớp đã chọn. Tiêu đề = tên file (bỏ .html). Bạn có thể sửa lại trong exams.json sau.</div>
 </div>
-
 <script>
     let currentExams = [];
-
     async function loadExams() {
         try {
-            const res = await fetch("exams.json?v=" + Date.now());
-            if (res.ok) {
-                currentExams = await res.json();
-                if (!Array.isArray(currentExams)) currentExams = [];
-            } else {
-                currentExams = [];
-            }
-        } catch(e) {
-            currentExams = [];
-        }
+            const res = await fetch("exams.json?v="+Date.now());
+            if(res.ok) currentExams = await res.json();
+            else currentExams = [];
+        } catch(e){ currentExams=[]; }
         renderExamList();
     }
-
     function renderExamList() {
         const container = document.getElementById("examList");
-        if (!currentExams.length) {
-            container.innerHTML = "<p>Chưa có đề nào.</p>";
-            return;
-        }
-        let html = `<table>
-            <thead><tr><th>ID</th><th>Tiêu đề</th><th>Lớp</th><th>Tuần</th><th>Mở</th><th>Đóng</th><th>File HTML</th><th>Thao tác</th></tr></thead>
-            <tbody>`;
-        currentExams.forEach((ex, index) => {
-            html += `<tr>
-                <td>${ex.id}</td>
-                <td>${ex.title}</td>
-                <td>${ex.class}</td>
-                <td>${ex.week || ''}</td>
-                <td>${ex.open}</td>
-                <td>${ex.close}</td>
-                <td>${ex.html}</td>
-                <td><button class="deleteBtn" data-index="${index}">🗑️ Xóa</button></td>
-            </tr>`;
+        if(!currentExams.length){ container.innerHTML="<p>Chưa có đề nào.</p>"; return; }
+        let html = `<table><thead><tr><th>ID</th><th>Tiêu đề</th><th>Lớp</th><th>Tuần</th><th>Mở</th><th>Đóng</th><th>File</th><th>Xóa</th></tr></thead><tbody>`;
+        currentExams.forEach((ex,idx)=>{
+            html += `<tr><td>${ex.id}</td><td>${ex.title}</td><td>${ex.class}</td><td>${ex.week||''}</td><td>${ex.open}</td><td>${ex.close}</td><td>${ex.html}</td><td><button class="delBtn" data-idx="${idx}">🗑️</button></td></tr>`;
         });
         html += `</tbody></table><p class="success">✅ Tổng số đề: ${currentExams.length}</p>`;
         container.innerHTML = html;
-        document.querySelectorAll('.deleteBtn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const idx = parseInt(btn.getAttribute('data-index'));
-                if (confirm(`Xóa đề "${currentExams[idx].title}"?`)) {
-                    currentExams.splice(idx, 1);
-                    renderExamList();
-                }
-            });
+        document.querySelectorAll('.delBtn').forEach(btn=>{
+            btn.onclick=()=>{ let idx=parseInt(btn.dataset.idx); if(confirm("Xóa đề?")){ currentExams.splice(idx,1); renderExamList(); } };
         });
     }
-
-    function downloadCurrentJson() {
-        if (!currentExams.length) {
-            alert("Chưa có dữ liệu. Hãy làm mới trước.");
-            return;
-        }
-        const jsonStr = JSON.stringify(currentExams, null, 2);
-        const blob = new Blob([jsonStr], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "exams.json";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+    function downloadCurrentJson(){
+        if(!currentExams.length){ alert("Không có dữ liệu."); return; }
+        const blob = new Blob([JSON.stringify(currentExams,null,2)], {type:"application/json"});
+        const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="exams.json"; a.click(); URL.revokeObjectURL(a.href);
         alert("Đã tải exams.json. Hãy upload lên GitHub.");
     }
-
-    // Hiển thị danh sách file đã chọn
     const fileInput = document.getElementById("htmlFiles");
-    const fileListDiv = document.getElementById("selectedFilesList");
-    fileInput.addEventListener("change", () => {
+    fileInput.onchange = ()=>{
         const files = Array.from(fileInput.files);
-        if (files.length) {
-            fileListDiv.style.display = "block";
-            fileListDiv.innerHTML = `<strong>Đã chọn ${files.length} file:</strong><ul>${files.map(f => `<li>${f.name}</li>`).join('')}</ul>`;
-        } else {
-            fileListDiv.style.display = "none";
-        }
-    });
-
-    document.getElementById("addMultipleBtn").onclick = async () => {
+        const div = document.getElementById("selectedFilesList");
+        if(files.length){ div.style.display="block"; div.innerHTML = `<strong>Đã chọn ${files.length} file:</strong><ul>${files.map(f=>`<li>${f.name}</li>`).join('')}</ul>`; }
+        else div.style.display="none";
+    };
+    document.getElementById("addMultipleBtn").onclick = async ()=>{
         const files = Array.from(fileInput.files);
-        if (files.length === 0) {
-            alert("Vui lòng chọn ít nhất một file HTML.");
-            return;
-        }
-        const selectedClasses = Array.from(document.querySelectorAll('#classCheckboxes input:checked')).map(cb => cb.value);
-        if (selectedClasses.length === 0) {
-            alert("Vui lòng chọn ít nhất một lớp.");
-            return;
-        }
+        if(!files.length){ alert("Chọn ít nhất một file HTML."); return; }
+        const selectedClasses = Array.from(document.querySelectorAll('#classCheckboxes input:checked')).map(cb=>cb.value);
+        if(!selectedClasses.length){ alert("Chọn ít nhất một lớp."); return; }
         const week = document.getElementById("week").value.trim();
         const open = document.getElementById("open").value;
         const close = document.getElementById("close").value;
-        if (!open || !close) {
-            alert("Vui lòng chọn ngày mở và đóng.");
-            return;
-        }
-
-        // Tạo danh sách các đề mới
+        if(!open || !close){ alert("Chọn ngày mở và đóng."); return; }
         let newExams = [];
-        for (const file of files) {
-            const baseName = file.name.replace(/\.html$/i, "");
-            const title = baseName; // hoặc có thể nhập thủ công nếu muốn
-            // Tạo ID duy nhất: lấy tên file + timestamp
-            const idPrefix = baseName.replace(/[^a-zA-Z0-9]/g, "_");
-            for (const cls of selectedClasses) {
+        for(const file of files){
+            const title = file.name.replace(/\.html$/i,"");
+            const idPrefix = title.replace(/[^a-zA-Z0-9]/g,"_");
+            for(const cls of selectedClasses){
                 const id = `${idPrefix}_${cls}_${Date.now()}_${Math.floor(Math.random()*1000)}`;
-                newExams.push({
-                    id: id,
-                    title: title,
-                    week: week,
-                    class: cls,
-                    open: open,
-                    close: close,
-                    html: file.name
-                });
+                newExams.push({ id, title, grade: cls, class: cls, week, open, close, html: file.name });
             }
         }
-
-        // Gộp với danh sách cũ
-        const updatedExams = [...currentExams, ...newExams];
-
-        // Xuất file
-        const jsonStr = JSON.stringify(updatedExams, null, 2);
-        const blob = new Blob([jsonStr], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "exams.json";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        alert(`✅ Đã tạo exams.json với ${updatedExams.length} đề (cũ: ${currentExams.length}, mới: ${newExams.length}).\n👉 Upload file này lên GitHub và upload tất cả file HTML đã chọn lên cùng thư mục.`);
-        
-        // Cập nhật bộ nhớ
-        currentExams = updatedExams;
+        const updated = [...currentExams, ...newExams];
+        const blob = new Blob([JSON.stringify(updated,null,2)], {type:"application/json"});
+        const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="exams.json"; a.click(); URL.revokeObjectURL(a.href);
+        alert(`✅ Đã tạo exams.json với ${updated.length} đề (cũ:${currentExams.length}, mới:${newExams.length}).\n👉 Upload file này và tất cả file HTML đã chọn lên GitHub.`);
+        currentExams = updated;
         renderExamList();
-        
-        // Reset form
-        fileInput.value = "";
-        fileListDiv.style.display = "none";
-        document.getElementById("week").value = "";
-        document.getElementById("open").value = "";
-        document.getElementById("close").value = "";
-        document.querySelectorAll('#classCheckboxes input:checked').forEach(cb => cb.checked = false);
+        fileInput.value=""; document.getElementById("selectedFilesList").style.display="none";
+        document.getElementById("week").value=""; document.getElementById("open").value=""; document.getElementById("close").value="";
+        document.querySelectorAll('#classCheckboxes input:checked').forEach(cb=>cb.checked=false);
     };
-
-    document.getElementById("refreshListBtn").onclick = () => loadExams();
-    document.getElementById("downloadCurrentBtn").onclick = () => downloadCurrentJson();
-
+    document.getElementById("refreshListBtn").onclick = ()=>loadExams();
+    document.getElementById("downloadCurrentBtn").onclick = ()=>downloadCurrentJson();
     loadExams();
 </script>
 </body>
