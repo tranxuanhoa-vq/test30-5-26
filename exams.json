@@ -1,42 +1,32 @@
 [
   {
-    "id": "de_hs_11A4",
-    "title": "Ôn tập Hàm số",
-    "grade": "11",
-    "class": "11A4",
-    "week": "2026-W01",
+    "id": "de_hs_VRNZ4P_10_1780136092974_662",
+    "title": "de_hs_VRNZ4P",
+    "grade": "10",
+    "class": "10",
+    "week": "1",
     "open": "2026-05-30",
-    "close": "2026-07-04",
-    "html": "de_hs_24J67O.html"
+    "close": "2026-06-30",
+    "html": "de_hs_VRNZ4P.html"
   },
   {
-    "id": "de_daoham_11A4",
-    "title": "Đạo hàm",
+    "id": "de_hs_00I5L1_11_1780136141878_991",
+    "title": "de_hs_00I5L1",
     "grade": "11",
-    "class": "11A4",
-    "week": "2026-W02",
-    "open": "2026-06-02",
-    "close": "2026-06-09",
-    "html": "de_daoham.html"
+    "class": "11",
+    "week": "1",
+    "open": "2026-05-30",
+    "close": "2026-06-30",
+    "html": "de_hs_00I5L1.html"
   },
   {
-    "id": "ontn_cd1_12A1",
-    "title": "Ôn TN - Chuyên đề 1",
-    "grade": "ontn",
-    "class": "12A1",
-    "week": "2026-W10",
-    "open": "2026-07-01",
-    "close": "2026-07-30",
-    "html": "ontn_cd1.html"
-  },
-  {
-    "id": "thithu_lan1_12A1",
-    "title": "Thi thử lần 1",
-    "grade": "thithu",
-    "class": "12A1",
-    "week": "2026-W15",
-    "open": "2026-08-10",
-    "close": "2026-08-10",
-    "html": "thithu_lan1.html"
+    "id": "de_hs_XOKWP2_12_1780136185645_841",
+    "title": "de_hs_XOKWP2",
+    "grade": "12",
+    "class": "12",
+    "week": "1",
+    "open": "2026-05-30",
+    "close": "2026-06-25",
+    "html": "de_hs_XOKWP2.html"
   }
 ]
