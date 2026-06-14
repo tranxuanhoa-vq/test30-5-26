@@ -124,21 +124,43 @@
     let currentExams = [];
     let currentDocs = [];
 
-    // DANH SÁCH LỚP CHUẨN (2..12, ontn, thithu9, thithu12)
+    // DANH SÁCH LỚP CHUẨN (đã bao gồm thi thử)
     const ALL_GRADES = [
         { id: "2", name: "Lớp 2" }, { id: "3", name: "Lớp 3" }, { id: "4", name: "Lớp 4" },
         { id: "5", name: "Lớp 5" }, { id: "6", name: "Lớp 6" }, { id: "7", name: "Lớp 7" },
         { id: "8", name: "Lớp 8" }, { id: "9", name: "Lớp 9" }, { id: "10", name: "Lớp 10" },
         { id: "11", name: "Lớp 11" }, { id: "12", name: "Lớp 12" },
-        { id: "ontn", name: "Ôn TN" }, { id: "thithu9", name: "Thi thử lớp 9" },
+        { id: "ontn", name: "Ôn TN" },
+        { id: "thithu9", name: "Thi thử lớp 9" },
         { id: "thithu12", name: "Thi thử lớp 12" }
     ];
 
-    // Grade visibility
+    // Grade visibility - tự động cập nhật khi có lớp mới
     function loadGradeVisibility() {
         let vis = localStorage.getItem("gradeVisibility");
-        if(!vis){ let d={}; ALL_GRADES.forEach(g=>d[g.id]=true); return d; }
-        return JSON.parse(vis);
+        let defaultVis = {};
+        ALL_GRADES.forEach(g => defaultVis[g.id] = true);
+        if (!vis) {
+            localStorage.setItem("gradeVisibility", JSON.stringify(defaultVis));
+            return defaultVis;
+        }
+        try {
+            let parsed = JSON.parse(vis);
+            let changed = false;
+            for (let g of ALL_GRADES) {
+                if (parsed[g.id] === undefined) {
+                    parsed[g.id] = true;
+                    changed = true;
+                }
+            }
+            if (changed) {
+                localStorage.setItem("gradeVisibility", JSON.stringify(parsed));
+            }
+            return parsed;
+        } catch(e) {
+            localStorage.setItem("gradeVisibility", JSON.stringify(defaultVis));
+            return defaultVis;
+        }
     }
     function saveGradeVisibility(vis){ localStorage.setItem("gradeVisibility",JSON.stringify(vis)); alert("Đã lưu cấu hình lớp"); renderGradeVisibilityCheckboxes(); }
     function renderGradeVisibilityCheckboxes(){
@@ -152,10 +174,16 @@
     async function loadExams(){
         try{
             let res=await fetch("exams.json?v="+Date.now());
-            if(res.ok) currentExams=await res.json();
-            else currentExams=[];
-        }catch(e){ currentExams=[]; }
-        renderExamList();
+            if(res.ok){
+                currentExams = await res.json();
+                renderExamList();
+            } else {
+                console.warn("Không thể tải exams.json, giữ nguyên dữ liệu cũ.");
+            }
+        }catch(e){
+            console.error("Lỗi fetch exams.json:", e);
+            alert("Không thể kết nối đến exams.json. Kiểm tra lại đường dẫn.");
+        }
     }
     function renderExamList(){
         let container=document.getElementById("examList");
@@ -178,13 +206,12 @@
                 <td><button class="delExamBtn" data-idx="${idx}">🗑️</button></td>
             </tr>`;
         });
-        html+=`</tbody></table><p class="success">Tổng: ${currentExams.length} đề</p>`;
+        html+=`</tbody></td><p class="success">Tổng: ${currentExams.length} đề</p>`;
         container.innerHTML=html;
         document.querySelectorAll(".delExamBtn").forEach(btn=>{
             btn.onclick=()=>{ if(confirm("Xóa đề?")){ currentExams.splice(parseInt(btn.dataset.idx),1); renderExamList(); } };
         });
     }
-    // Nạp exams.json từ file
     document.getElementById("uploadExamsJson").onchange = (e) => {
         let file = e.target.files[0];
         if(!file) return;
@@ -207,15 +234,21 @@
     async function loadDocs(){
         try{
             let res=await fetch("docs.json?v="+Date.now());
-            if(res.ok) currentDocs=await res.json();
-            else currentDocs=[];
-        }catch(e){ currentDocs=[]; }
-        renderDocList();
+            if(res.ok){
+                currentDocs = await res.json();
+                renderDocList();
+            } else {
+                console.warn("Không thể tải docs.json, giữ nguyên dữ liệu cũ.");
+            }
+        }catch(e){
+            console.error("Lỗi fetch docs.json:", e);
+            alert("Không thể kết nối đến docs.json.");
+        }
     }
     function renderDocList(){
         let container=document.getElementById("docList");
         if(!currentDocs.length){ container.innerHTML="<p>Chưa có tài liệu.</p>"; return; }
-        let html=`<table><thead>
+        let html=`</table><thead>
             <tr><th>Tiêu đề</th><th>Mô tả</th><th>Lớp</th><th>Môn</th><th>File</th><th>Xóa</th></tr>
         </thead><tbody>`;
         currentDocs.forEach((doc,idx)=>{
@@ -234,7 +267,6 @@
             btn.onclick=()=>{ if(confirm("Xóa tài liệu?")){ currentDocs.splice(parseInt(btn.dataset.idx),1); renderDocList(); } };
         });
     }
-    // Nạp docs.json từ file
     document.getElementById("uploadDocsJson").onchange = (e) => {
         let file = e.target.files[0];
         if(!file) return;
@@ -253,7 +285,7 @@
         e.target.value = "";
     };
 
-    // Thêm đề (giữ nguyên)
+    // Thêm đề
     function injectSubmitScript(htmlContent, fileName){
         let script=`<script>(function(){const KEY="exam_submits";const FILE_NAME="${fileName.replace(/"/g,'\\"')}";function increaseSubmit(){let s=JSON.parse(localStorage.getItem(KEY))||{};s[FILE_NAME]=(s[FILE_NAME]||0)+1;localStorage.setItem(KEY,JSON.stringify(s));alert("Đã ghi nhận lượt nộp bài!");}let btn=document.getElementById("submit-btn");if(btn)btn.addEventListener("click",increaseSubmit);else document.querySelectorAll("button,input[type=submit]").forEach(b=>{if(b.innerText.includes("Nộp")||b.value.includes("Nộp"))b.addEventListener("click",increaseSubmit);});})();<\/script>`;
         return htmlContent.includes("</body>") ? htmlContent.replace("</body>",script+"\n</body>") : htmlContent+script;
@@ -304,7 +336,7 @@
         document.getElementById("htmlFiles").value=""; document.getElementById("selectedFilesList").innerHTML="";
     };
 
-    // Thêm tài liệu (giữ nguyên)
+    // Thêm tài liệu
     function updateDocGradeSelect(){
         let select=document.getElementById("docGrade");
         select.innerHTML='<option value="">-- Chọn lớp --</option>';
@@ -352,10 +384,14 @@
         else div.style.display="none";
     };
 
-    // Các nút
-    document.getElementById("refreshListBtn").onclick=loadExams;
+    // Các nút (có xác nhận trước khi làm mới)
+    document.getElementById("refreshListBtn").onclick = () => {
+        if(confirm("Làm mới sẽ mất mọi thay đổi chưa xuất ZIP. Tiếp tục?")) loadExams();
+    };
     document.getElementById("downloadCurrentBtn").onclick=()=>{ let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(currentExams,null,2)],{type:"application/json"}));a.download="exams.json";a.click(); };
-    document.getElementById("refreshDocsBtn").onclick=loadDocs;
+    document.getElementById("refreshDocsBtn").onclick = () => {
+        if(confirm("Làm mới sẽ mất mọi thay đổi chưa xuất ZIP. Tiếp tục?")) loadDocs();
+    };
     document.getElementById("downloadDocsBtn").onclick=()=>{ let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(currentDocs,null,2)],{type:"application/json"}));a.download="docs.json";a.click(); };
     document.getElementById("saveGradeVisibilityBtn").onclick=()=>{
         let vis={};

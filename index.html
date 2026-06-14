@@ -71,30 +71,35 @@
     let allDocs = [];
     let currentTab = "de";
 
-    // Hàm loadGradeVisibility có migrate: nếu thiếu key mới thì thêm vào với giá trị true
+    // Hàm loadGradeVisibility tự động bổ sung các lớp mới nếu thiếu
     function loadGradeVisibility() {
         let vis = localStorage.getItem("gradeVisibility");
         let defaultVis = {};
         ALL_CATEGORIES.forEach(c => defaultVis[c.id] = true);
         if (!vis) {
-            // chưa có thì tạo mới
             localStorage.setItem("gradeVisibility", JSON.stringify(defaultVis));
             return defaultVis;
         }
-        let parsed = JSON.parse(vis);
-        // migrate: thêm các key mới nếu thiếu
-        let changed = false;
-        ALL_CATEGORIES.forEach(c => {
-            if (parsed[c.id] === undefined) {
-                parsed[c.id] = true;
-                changed = true;
+        try {
+            let parsed = JSON.parse(vis);
+            // Bổ sung các lớp chưa có trong cấu hình cũ
+            let changed = false;
+            for (let cat of ALL_CATEGORIES) {
+                if (parsed[cat.id] === undefined) {
+                    parsed[cat.id] = true;
+                    changed = true;
+                }
             }
-        });
-        if (changed) {
-            localStorage.setItem("gradeVisibility", JSON.stringify(parsed));
+            if (changed) {
+                localStorage.setItem("gradeVisibility", JSON.stringify(parsed));
+            }
+            return parsed;
+        } catch(e) {
+            localStorage.setItem("gradeVisibility", JSON.stringify(defaultVis));
+            return defaultVis;
         }
-        return parsed;
     }
+
     function filterCategories() {
         let enabled = loadGradeVisibility();
         activeCategories = ALL_CATEGORIES.filter(c => enabled[c.id] === true);
@@ -105,13 +110,15 @@
         try {
             let res = await fetch("exams.json?v="+Date.now());
             if(res.ok) allExams = await res.json();
-        } catch(e) { console.log(e); }
+            else console.warn("Không thể tải exams.json");
+        } catch(e) { console.error("Lỗi fetch exams.json:", e); }
     }
     async function loadDocs() {
         try {
             let res = await fetch("docs.json?v="+Date.now());
             if(res.ok) allDocs = await res.json();
-        } catch(e) { console.log(e); }
+            else console.warn("Không thể tải docs.json");
+        } catch(e) { console.error("Lỗi fetch docs.json:", e); }
     }
 
     function getSubmits(fileName) {
