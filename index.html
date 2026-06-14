@@ -58,10 +58,10 @@
 
 <script>
     const ALL_CATEGORIES = [
-        { id: "2", name: "Toán 2" },{ id: "3", name: "Toán 3" },{ id: "4", name: "Toán 4" },
-        { id: "5", name: "Toán 5" },{ id: "6", name: "Toán 6" },{ id: "7", name: "Toán 7" },
-        { id: "8", name: "Toán 8" },{ id: "9", name: "Toán 9" },{ id: "10", name: "Toán 10" },
-        { id: "11", name: "Toán 11" },{ id: "12", name: "Toán 12" },
+        { id: "2", name: "Lớp 2" },{ id: "3", name: "Lớp 3" },{ id: "4", name: "Lớp 4" },
+        { id: "5", name: "Lớp 5" },{ id: "6", name: "Lớp 6" },{ id: "7", name: "Lớp 7" },
+        { id: "8", name: "Lớp 8" },{ id: "9", name: "Lớp 9" },{ id: "10", name: "Lớp 10" },
+        { id: "11", name: "Lớp 11" },{ id: "12", name: "Lớp 12" },
         { id: "ontn", name: "Ôn TN" },{ id: "thithu", name: "Thi thử" }
     ];
     let activeCategories = [];
@@ -174,11 +174,12 @@
             let btnClass=disabled?"btn btn-disabled":"btn";
             let submits=getSubmits(ex.html);
             let noLimitBadge = (ex.timeLimited===false) ? '<span class="no-time-badge">♾️ Không giới hạn</span>' : '';
+            let subjectDisplay = ex.subject ? ` | Môn: ${ex.subject}` : '';
             return `
                 <div class="de-card ${extraClass}">
                     <h3>📄 ${ex.title} ${noLimitBadge}</h3>
                     <div class="de-meta">${ex.timeLimited!==false ? `📅 ${ex.open} → ${ex.close}` : '⏰ Luôn mở'}</div>
-                    <div class="de-meta">🏫 Lớp ${ex.grade} | Tuần ${ex.week||''}</div>
+                    <div class="de-meta">🏫 ${ex.grade}${subjectDisplay} | Tuần ${ex.week||''}</div>
                     <div class="luot-lam">📊 Lượt nộp: ${submits}</div>
                     <a href="${disabled?"#":ex.html}" class="${btnClass}">${btnText}</a>
                 </div>
@@ -186,7 +187,6 @@
         }).join("");
     }
 
-    // Xem PDF bằng Google Docs Viewer
     function viewPdfWithGoogleDocs(fileUrl) {
         let absoluteUrl = fileUrl;
         if (!fileUrl.startsWith('http')) {
@@ -197,9 +197,8 @@
         window.open(viewerUrl, '_blank');
     }
 
-    // ========== TÀI LIỆU CÓ LỌC LỚP + MÔN ==========
-    let currentDocGrade = "11";      // lớp đang chọn để lọc tài liệu
-    let currentDocSubject = "Toán";  // môn đang chọn
+    let currentDocGrade = "11";
+    let currentDocSubject = "Toán";
 
     function renderTaiLieu() {
         let container = document.getElementById("content");
@@ -207,17 +206,15 @@
             container.innerHTML = `<div style="text-align:center; padding:40px;">📭 Chưa có tài liệu nào.</div>`;
             return;
         }
-        // Lọc theo lớp được bật (cấu hình hiển thị)
         let enabledGrades = loadGradeVisibility();
         let docs = allDocs.filter(doc => {
             if(!doc.grade) return false;
             return enabledGrades[doc.grade] === true;
         });
-        // Tiếp tục lọc theo lớp và môn đã chọn
         docs = docs.filter(doc => doc.grade === currentDocGrade && doc.subject === currentDocSubject);
         
         if(docs.length===0){
-            container.innerHTML = `<div style="text-align:center; padding:40px;">📭 Không có tài liệu cho lớp ${currentDocGrade} môn ${currentDocSubject}.</div>`;
+            container.innerHTML = `<div style="text-align:center; padding:40px;">📭 Không có tài liệu cho ${currentDocGrade} - ${currentDocSubject}.</div>`;
             return;
         }
         
@@ -246,7 +243,6 @@
         html += `</div>`;
         container.innerHTML = html;
         
-        // Đổ dropdown lớp (chỉ hiển thị các lớp được bật)
         let gradeSelect = document.getElementById("filterGrade");
         if(gradeSelect){
             gradeSelect.innerHTML = "";
@@ -257,7 +253,6 @@
                 gradeSelect.innerHTML += `<option value="${g}" ${selected}>${gradeName}</option>`;
             });
         }
-        // Đổ dropdown môn (các môn có trong tài liệu hoặc cố định)
         let subjectSelect = document.getElementById("filterSubject");
         if(subjectSelect){
             let subjects = [...new Set(allDocs.filter(d=>enabledGrades[d.grade]).map(d=>d.subject))];
@@ -268,7 +263,6 @@
                 subjectSelect.innerHTML += `<option value="${sub}" ${selected}>${sub}</option>`;
             });
         }
-        // Gắn sự kiện lọc
         let applyBtn = document.getElementById("applyDocFilterBtn");
         if(applyBtn){
             applyBtn.onclick = () => {

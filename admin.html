@@ -2,15 +2,15 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản trị - Đề thi & Tài liệu (theo lớp + môn)</title>
+    <title>Quản trị - Đề thi & Tài liệu (Môn + Lớp chuẩn)</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: system-ui; max-width: 1200px; margin: 0 auto; padding: 20px; background: #f5f7fb; }
         .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         label { font-weight: bold; display: block; margin-top: 12px; }
         input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; }
-        .checkbox-group { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 8px; }
-        .checkbox-group label { display: inline-flex; align-items: center; gap: 5px; font-weight: normal; margin-top: 0; }
+        .checkbox-group { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 8px; max-height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 8px; border-radius: 8px; background: #fafafa; }
+        .checkbox-group label { display: inline-flex; align-items: center; gap: 5px; font-weight: normal; margin-top: 0; width: calc(25% - 15px); min-width: 90px; }
         button { background: #1e3c72; color: white; padding: 10px 20px; border: none; border-radius: 8px; margin-top: 20px; cursor: pointer; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; overflow-x: auto; display: block; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -19,19 +19,20 @@
         .success { background: #d4edda; padding: 12px; border-radius: 8px; }
         .file-list { background: #f0f0f0; padding: 10px; border-radius: 8px; margin-top: 10px; }
         hr { margin: 20px 0; }
+        .subject-select { max-height: 200px; overflow-y: auto; }
     </style>
 </head>
 <body>
-<h1>🛠 Quản trị hệ thống (Đề thi + Tài liệu theo Lớp/Môn)</h1>
+<h1>🛠 Quản trị hệ thống (Đề thi + Tài liệu theo Môn + Lớp)</h1>
 
-<!-- ========== CẤU HÌNH HIỂN THỊ LỚP ========== -->
+<!-- Cấu hình hiển thị lớp -->
 <div class="card">
     <h2>🔘 Bật / Tắt hiển thị lớp (cho học sinh)</h2>
     <div class="checkbox-group" id="gradeVisibilityGroup"></div>
     <button id="saveGradeVisibilityBtn" style="background:#27ae60;">💾 Lưu cấu hình</button>
 </div>
 
-<!-- ========== QUẢN LÝ ĐỀ THI ========== -->
+<!-- Quản lý đề thi -->
 <div class="card">
     <h2>📋 Đề thi</h2>
     <div id="examList">Đang tải...</div>
@@ -39,8 +40,27 @@
     <button id="downloadCurrentBtn" style="background:#2980b9;">💾 Tải exams.json</button>
     <hr>
     <h3>➕ Thêm đề mới</h3>
+    
+    <label>Môn *</label>
+    <select id="examSubject" class="subject-select">
+        <option value="Toán">Toán</option>
+        <option value="Vật lý">Vật lý</option>
+        <option value="Hóa học">Hóa học</option>
+        <option value="Ngữ văn">Ngữ văn</option>
+        <option value="Tiếng Anh">Tiếng Anh</option>
+        <option value="Lịch sử">Lịch sử</option>
+        <option value="Địa lý">Địa lý</option>
+        <option value="GDCD">GDCD</option>
+        <option value="Sinh học">Sinh học</option>
+        <option value="Tin học">Tin học</option>
+        <option value="Công nghệ">Công nghệ</option>
+    </select>
+
+    <label>Lớp * (chọn nhiều)</label>
     <div class="checkbox-group" id="classCheckboxes"></div>
-    <label>Tuần</label><input type="text" id="week" placeholder="2026-W01">
+
+    <label>Tuần (không bắt buộc)</label><input type="text" id="week" placeholder="2026-W01">
+
     <div style="margin:10px 0;">
         <label><input type="checkbox" id="timeLimitedCheckbox" checked> ⏱️ Có giới hạn thời gian</label>
     </div>
@@ -53,9 +73,9 @@
     <button id="addMultipleBtn">📦 Tạo ZIP (exams.json + HTML đã chèn script)</button>
 </div>
 
-<!-- ========== QUẢN LÝ TÀI LIỆU (PDF/DOCX) THEO LỚP + MÔN ========== -->
+<!-- Quản lý tài liệu -->
 <div class="card">
-    <h2>📚 Tài liệu học tập (PDF, DOCX) – Có lớp & môn</h2>
+    <h2>📚 Tài liệu học tập (PDF, DOCX) – Có Môn + Lớp</h2>
     <div id="docList">Đang tải...</div>
     <button id="refreshDocsBtn" style="background:#27ae60;">🔄 Làm mới</button>
     <button id="downloadDocsBtn" style="background:#2980b9;">💾 Tải docs.json</button>
@@ -68,7 +88,7 @@
     <select id="docGrade"></select>
     
     <label>Môn *</label>
-    <select id="docSubject">
+    <select id="docSubject" class="subject-select">
         <option value="Toán">Toán</option>
         <option value="Vật lý">Vật lý</option>
         <option value="Hóa học">Hóa học</option>
@@ -86,27 +106,26 @@
     <input type="file" id="docFiles" accept=".pdf,.docx" multiple>
     <div id="selectedDocFilesList" class="file-list"></div>
     <button id="addDocsBtn">📦 Tạo ZIP (docs.json + tài liệu)</button>
-    <div class="warning">📌 Các file tài liệu sẽ được đóng gói cùng docs.json. Giải nén và upload lên GitHub.</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-    // ========== DỮ LIỆU ==========
     let currentExams = [];
     let currentDocs = [];
 
+    // DANH SÁCH LỚP CHUẨN (2..12, ontn, thithu)
     const ALL_GRADES = [
-        { id: "2", name: "Toán 2" },{ id: "3", name: "Toán 3" },{ id: "4", name: "Toán 4" },
-        { id: "5", name: "Toán 5" },{ id: "6", name: "Toán 6" },{ id: "7", name: "Toán 7" },
-        { id: "8", name: "Toán 8" },{ id: "9", name: "Toán 9" },{ id: "10", name: "Toán 10" },
-        { id: "11", name: "Toán 11" },{ id: "12", name: "Toán 12" },
-        { id: "ontn", name: "Ôn TN" },{ id: "thithu", name: "Thi thử" }
+        { id: "2", name: "Lớp 2" }, { id: "3", name: "Lớp 3" }, { id: "4", name: "Lớp 4" },
+        { id: "5", name: "Lớp 5" }, { id: "6", name: "Lớp 6" }, { id: "7", name: "Lớp 7" },
+        { id: "8", name: "Lớp 8" }, { id: "9", name: "Lớp 9" }, { id: "10", name: "Lớp 10" },
+        { id: "11", name: "Lớp 11" }, { id: "12", name: "Lớp 12" },
+        { id: "ontn", name: "Ôn TN" }, { id: "thithu", name: "Thi thử" }
     ];
 
-    // ========== GRADE VISIBILITY ==========
+    // Grade visibility
     function loadGradeVisibility() {
         let vis = localStorage.getItem("gradeVisibility");
-        if(!vis){ let d={}; ALL_GRADES.forEach(g=>d[g.id]=true); localStorage.setItem("gradeVisibility",JSON.stringify(d)); return d; }
+        if(!vis){ let d={}; ALL_GRADES.forEach(g=>d[g.id]=true); return d; }
         return JSON.parse(vis);
     }
     function saveGradeVisibility(vis){ localStorage.setItem("gradeVisibility",JSON.stringify(vis)); alert("Đã lưu cấu hình lớp"); renderGradeVisibilityCheckboxes(); }
@@ -117,7 +136,7 @@
         document.getElementById("gradeVisibilityGroup").innerHTML=html;
     }
 
-    // ========== LOAD EXAMS ==========
+    // Exams
     async function loadExams(){
         try{
             let res=await fetch("exams.json?v="+Date.now());
@@ -129,10 +148,10 @@
     function renderExamList(){
         let container=document.getElementById("examList");
         if(!currentExams.length){ container.innerHTML="<p>Chưa có đề.</p>"; return; }
-        let html=`<table><thead><tr><th>ID</th><th>Tiêu đề</th><th>Lớp</th><th>Tuần</th><th>Thời gian</th><th>Mở</th><th>Đóng</th><th>File</th><th>Xóa</th></tr></thead><tbody>`;
+        let html=`<table><thead><tr><th>ID</th><th>Tiêu đề</th><th>Môn</th><th>Lớp</th><th>Tuần</th><th>Thời gian</th><th>Mở</th><th>Đóng</th><th>File</th><th>Xóa</th></tr></thead><tbody>`;
         currentExams.forEach((ex,idx)=>{
             let timeStatus = ex.timeLimited===false ? "♾️ Không giới hạn" : "⏱️ Có hạn";
-            html+=`<tr><td>${ex.id}</td><td>${ex.title}</td><td>${ex.grade}</td><td>${ex.week||''}</td><td>${timeStatus}</td><td>${ex.open||'—'}</td><td>${ex.close||'—'}</td><td>${ex.html}</td><td><button class="delExamBtn" data-idx="${idx}">🗑️</button></td></tr>`;
+            html+=`<tr><td>${ex.id}</td><td>${ex.title}</td><td>${ex.subject || 'Toán'}</td><td>${ex.grade}</td><td>${ex.week||''}</td><td>${timeStatus}</td><td>${ex.open||'—'}</td><td>${ex.close||'—'}</td><td>${ex.html}</td><td><button class="delExamBtn" data-idx="${idx}">🗑️</button></td></tr>`;
         });
         html+=`</tbody></table><p class="success">Tổng: ${currentExams.length} đề</p>`;
         container.innerHTML=html;
@@ -141,7 +160,7 @@
         });
     }
 
-    // ========== LOAD DOCS ==========
+    // Docs
     async function loadDocs(){
         try{
             let res=await fetch("docs.json?v="+Date.now());
@@ -155,7 +174,7 @@
         if(!currentDocs.length){ container.innerHTML="<p>Chưa có tài liệu.</p>"; return; }
         let html=`<table><thead><tr><th>Tiêu đề</th><th>Mô tả</th><th>Lớp</th><th>Môn</th><th>File</th><th>Xóa</th></tr></thead><tbody>`;
         currentDocs.forEach((doc,idx)=>{
-            html+=`<tr><td>${doc.title}</td><td>${doc.description||''}</td><td>${doc.grade||'Tất cả'}</td><td>${doc.subject||''}</td><td>${doc.file}</td><td><button class="delDocBtn" data-idx="${idx}">🗑️</button></td></tr>`;
+            html+=`<tr><td>${doc.title}</td><td>${doc.description||''}</td><td>${doc.grade||''}</td><td>${doc.subject||''}</td><td>${doc.file}</td><td><button class="delDocBtn" data-idx="${idx}">🗑️</button></td></tr>`;
         });
         html+=`</tbody></table><p class="success">Tổng: ${currentDocs.length} tài liệu</p>`;
         container.innerHTML=html;
@@ -164,7 +183,7 @@
         });
     }
 
-    // ========== THÊM ĐỀ THI ==========
+    // Thêm đề
     function injectSubmitScript(htmlContent, fileName){
         let script=`<script>(function(){const KEY="exam_submits";const FILE_NAME="${fileName.replace(/"/g,'\\"')}";function increaseSubmit(){let s=JSON.parse(localStorage.getItem(KEY))||{};s[FILE_NAME]=(s[FILE_NAME]||0)+1;localStorage.setItem(KEY,JSON.stringify(s));alert("Đã ghi nhận lượt nộp bài!");}let btn=document.getElementById("submit-btn");if(btn)btn.addEventListener("click",increaseSubmit);else document.querySelectorAll("button,input[type=submit]").forEach(b=>{if(b.innerText.includes("Nộp")||b.value.includes("Nộp"))b.addEventListener("click",increaseSubmit);});})();<\/script>`;
         return htmlContent.includes("</body>") ? htmlContent.replace("</body>",script+"\n</body>") : htmlContent+script;
@@ -178,6 +197,8 @@
         if(!files.length){ alert("Chọn file HTML"); return; }
         let grades=Array.from(document.querySelectorAll('#classCheckboxes input:checked')).map(cb=>cb.value);
         if(!grades.length){ alert("Chọn ít nhất một lớp"); return; }
+        let subject = document.getElementById("examSubject").value;
+        if(!subject){ alert("Chọn môn"); return; }
         let week=document.getElementById("week").value.trim();
         let timeLimited=document.getElementById("timeLimitedCheckbox").checked;
         let open=timeLimited?document.getElementById("open").value:"";
@@ -193,7 +214,15 @@
             let idPrefix=title.replace(/[^a-zA-Z0-9]/g,"_");
             for(let grade of grades){
                 let id=`${idPrefix}_${grade}_${Date.now()}_${Math.floor(Math.random()*1000)}`;
-                newExams.push({id,title,grade,class:grade,week,open,close,html:file.name,timeLimited});
+                newExams.push({
+                    id, title,
+                    subject: subject,
+                    grade: grade,
+                    class: grade,
+                    week, open, close,
+                    html: file.name,
+                    timeLimited
+                });
             }
         }
         let allExams=[...currentExams,...newExams];
@@ -205,7 +234,7 @@
         document.getElementById("htmlFiles").value=""; document.getElementById("selectedFilesList").innerHTML="";
     };
 
-    // ========== THÊM TÀI LIỆU (CÓ LỚP VÀ MÔN) ==========
+    // Thêm tài liệu
     function updateDocGradeSelect(){
         let select=document.getElementById("docGrade");
         select.innerHTML='<option value="">-- Chọn lớp --</option>';
@@ -215,36 +244,28 @@
         let files=Array.from(document.getElementById("docFiles").files);
         if(!files.length){ alert("Chọn file PDF/DOCX"); return; }
         let title=document.getElementById("docTitle").value.trim();
-        if(!title){ alert("Nhập tiêu đề tài liệu"); return; }
+        if(!title){ alert("Nhập tiêu đề"); return; }
         let desc=document.getElementById("docDesc").value.trim();
         let grade=document.getElementById("docGrade").value;
         let subject=document.getElementById("docSubject").value;
-        if(!grade){ alert("Chọn lớp cho tài liệu"); return; }
-        if(!subject){ alert("Chọn môn cho tài liệu"); return; }
+        if(!grade){ alert("Chọn lớp"); return; }
+        if(!subject){ alert("Chọn môn"); return; }
         let zip=new JSZip();
         let newDocs=[];
         for(let file of files){
             let ext=file.name.split('.').pop().toLowerCase();
-            if(ext!=='pdf' && ext!=='docx'){ alert(`Bỏ qua file ${file.name} (chỉ hỗ trợ PDF, DOCX)`); continue; }
+            if(ext!=='pdf' && ext!=='docx'){ alert(`Bỏ qua ${file.name} (chỉ PDF/DOCX)`); continue; }
             let fileData=await file.arrayBuffer();
             zip.file(file.name,fileData);
             let id=`doc_${Date.now()}_${Math.random().toString(36).substr(2,6)}`;
-            newDocs.push({
-                id:id,
-                title:title,
-                description:desc,
-                file:file.name,
-                type:ext,
-                grade:grade,
-                subject:subject
-            });
+            newDocs.push({ id, title, description: desc, file: file.name, type: ext, grade, subject });
         }
         if(newDocs.length===0){ alert("Không có file hợp lệ"); return; }
         let allDocs=[...currentDocs,...newDocs];
         zip.file("docs.json",JSON.stringify(allDocs,null,2));
         let blob=await zip.generateAsync({type:"blob"});
         let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="tai_lieu_export.zip";a.click();URL.revokeObjectURL(a.href);
-        alert(`Đã tạo ZIP (${allDocs.length} tài liệu). Giải nén và upload lên GitHub.`);
+        alert(`Đã tạo ZIP (${allDocs.length} tài liệu). Upload lên GitHub.`);
         currentDocs=allDocs; renderDocList();
         document.getElementById("docTitle").value=""; document.getElementById("docDesc").value=""; document.getElementById("docFiles").value=""; document.getElementById("selectedDocFilesList").innerHTML="";
     };
@@ -261,7 +282,7 @@
         else div.style.display="none";
     };
 
-    // Nút tải riêng
+    // Nút tải
     document.getElementById("refreshListBtn").onclick=loadExams;
     document.getElementById("downloadCurrentBtn").onclick=()=>{ let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(currentExams,null,2)],{type:"application/json"}));a.download="exams.json";a.click(); };
     document.getElementById("refreshDocsBtn").onclick=loadDocs;
@@ -272,7 +293,6 @@
         saveGradeVisibility(vis);
     };
 
-    // Khởi tạo checkbox lớp cho phần thêm đề
     function renderClassCheckboxes(){
         let container=document.getElementById("classCheckboxes");
         container.innerHTML="";
