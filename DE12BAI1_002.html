@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kiểm tra</title>
+<script>
+window.MathJax={tex:{inlineMath:[['$','$'],['\(','\)']],displayMath:[['$$','$$'],['\[','\]']],
+  packages:{'[+]':['mathrsfs']},
+  macros:{hoac:['\left[\begin{aligned}#1\end{aligned}\right.',1],
+          heva:['\left\{\begin{aligned}#1\end{aligned}\right.',1]}},
+  startup:{typeset:false,ready(){MathJax.startup.defaultReady();
+    document.querySelectorAll('.mj').forEach(el=>MathJax.typesetPromise([el]).catch(()=>{}));}}};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<script>window.addEventListener('load',function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/input/tex/extensions/mathrsfs.min.js';document.head.appendChild(s);});</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;color:#1a202c;min-height:100vh}
+.app{max-width:760px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+h1{font-size:20px;font-weight:700;color:#1e3a5f;margin-bottom:4px}
+.meta{font-size:13px;color:#64748b;margin-bottom:16px}
+.countdown{text-align:center;padding:32px;background:linear-gradient(135deg,#1e3a5f,#2563eb);border-radius:16px;color:#fff;margin-bottom:16px}
+.countdown .big{font-size:48px;font-weight:900;letter-spacing:2px;font-variant-numeric:tabular-nums}
+.countdown .lbl{font-size:14px;opacity:.8;margin-top:4px}
+.timer-bar{background:#e2e8f0;border-radius:99px;height:8px;margin-bottom:16px;overflow:hidden}
+.timer-fill{height:100%;background:linear-gradient(90deg,#16a34a,#65a30d);border-radius:99px;transition:width 1s linear}
+.timer-fill.warn{background:linear-gradient(90deg,#f59e0b,#d97706)}
+.timer-fill.danger{background:linear-gradient(90deg,#ef4444,#dc2626)}
+.timer-txt{text-align:center;font-size:18px;font-weight:700;color:#1e3a5f;margin-bottom:4px}
+.q-wrap{margin-bottom:24px}
+.q-num{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:6px}
+.q-stem{font-size:15px;line-height:1.7;margin-bottom:14px}
+.choice-list{display:flex;flex-direction:column;gap:8px}
+.choice{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;transition:all .15s;background:#fff;text-align:left}
+.choice:hover{border-color:#2563eb;background:#eff6ff}
+.choice.selected{border-color:#2563eb;background:#dbeafe}
+.choice.correct{border-color:#16a34a;background:#dcfce7}
+.choice.wrong{border-color:#ef4444;background:#fee2e2}
+.choice-key{font-weight:700;color:#2563eb;min-width:20px;flex-shrink:0}
+.tf-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tf-item{border:1.5px solid #e2e8f0;border-radius:10px;padding:10px}
+.tf-item .tf-stem{font-size:13px;margin-bottom:6px;line-height:1.5}
+.tf-btn-row{display:flex;gap:6px}
+.tf-btn{flex:1;padding:6px;border:1.5px solid #e2e8f0;border-radius:7px;cursor:pointer;font-weight:600;font-size:12px;background:#fff;transition:all .15s}
+.tf-btn.sel-T{background:#dbeafe;border-color:#2563eb;color:#1d4ed8}
+.tf-btn.sel-F{background:#fce7f3;border-color:#db2777;color:#9d174d}
+.tf-btn.ok-T{background:#dcfce7;border-color:#16a34a;color:#15803d}
+.tf-btn.ok-F{background:#fee2e2;border-color:#ef4444;color:#b91c1c}
+.sa-input{width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:15px;outline:none;transition:border-color .15s}
+.sa-input:focus{border-color:#2563eb}
+.sa-input.correct{border-color:#16a34a;background:#dcfce7}
+.sa-input.wrong{border-color:#ef4444;background:#fee2e2}
+.nav{display:flex;gap:8px;align-items:center;margin-top:24px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-p{background:#2563eb;color:#fff}.btn-p:hover{background:#1d4ed8}
+.btn-g{background:#16a34a;color:#fff}.btn-g:hover{background:#15803d}
+.btn-ghost{background:#f1f5f9;color:#475569}.btn-ghost:hover{background:#e2e8f0}
+.dots{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px}
+.dot{width:28px;height:28px;border-radius:6px;border:1.5px solid #e2e8f0;background:#fff;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748b;transition:all .15s}
+.dot.answered{background:#dbeafe;border-color:#2563eb;color:#1d4ed8}
+.dot.current{background:#2563eb;color:#fff;border-color:#2563eb}
+.result-card{text-align:center;padding:32px}
+.result-score{font-size:56px;font-weight:900;margin:8px 0}
+.result-label{font-size:14px;color:#64748b}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700}
+.badge-ok{background:#dcfce7;color:#166534}
+.badge-fail{background:#fee2e2;color:#991b1b}
+.badge-partial{background:#fef3c7;color:#92400e}
+.loigiai-wrap{background:#f8fafc;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;margin-top:10px;font-size:13px;line-height:1.7}
+.closed-banner{text-align:center;padding:40px;color:#6b7280}
+.closed-banner .icon{font-size:48px;margin-bottom:12px}
+@media(max-width:600px){.tf-grid{grid-template-columns:1fr}}
+</style>
+<style>
+.tikz-img { max-width:100%; width:auto; display:block; margin:10px auto; border-radius:6px; object-fit:contain; }
+.tikz-rendered { display:block; margin:8px 0; overflow:visible; max-width:100%; }
+.tikz-placeholder { display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(100,160,255,.1);border:1px dashed rgba(100,160,255,.35);border-radius:4px;font-size:12px;color:rgba(80,130,220,.9); }
+.tikz-loading { padding:8px 12px;font-size:12px;color:var(--text2);font-style:italic; }
+.tikz-offline { padding:10px 14px;background:rgba(255,140,0,.07);border:1px dashed rgba(255,140,0,.45);border-radius:6px;font-size:12px;color:rgba(160,100,0,.95);max-width:560px;line-height:1.8;margin:6px 0; }
+.tikz-offline code { background:rgba(0,0,0,.09);padding:2px 6px;border-radius:3px;font-size:11px;font-family:monospace; }
+.tikz-error { padding:10px 14px;background:rgba(255,50,50,.07);border:1px dashed rgba(255,80,80,.4);border-radius:6px;font-size:11px;color:#e06060; }
+.tikz-error pre { margin-top:6px;font-size:10px;white-space:pre-wrap;max-height:200px;overflow-y:auto; }
+.itemchoice-list { display:flex;flex-direction:column;gap:6px;margin:8px 0; }
+.itemch-row { display:flex;gap:8px;align-items:flex-start;padding:4px 0; }
+.itemch-label { font-weight:700;min-width:22px;color:var(--blue);flex-shrink:0; }
+.itemch-body { flex:1;line-height:1.6; }
+#tikz-server-badge { cursor:pointer;transition:background .2s; }
+/* ── \immini layout: 2 cột, mobile responsive ── */
+.immini-wrap {
+  display:flex; gap:16px; align-items:center;  /* căn giữa figure theo chiều dọc */
+  flex-wrap:wrap; margin:8px 0;
+}
+.immini-text { flex:1; min-width:220px; }
+.immini-fig  {
+  flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  max-width:min(260px, 100%);
+}
+.immini-fig .tikz-img, .immini-fig img {
+  max-width:100%; height:auto; display:block; margin:0 auto;
+}
+/* Mobile: stack vertically */
+@media(max-width:540px){
+  .immini-wrap { flex-direction:column; align-items:stretch; }
+  .immini-fig  { max-width:100%; width:100%; justify-content:center; }
+  .immini-fig .tikz-img { max-width:min(300px,100%); margin:0 auto; }
+}
+/* ── Buổi học filter bar ── */
+.sess-filter-bar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:8px 12px;border-bottom:.5px solid var(--border);flex-shrink:0;background:var(--bg2)}
+/* ── Cascade filter: scroll inline (Chương/Bài/Dạng) ── */
+.cas-scroll-group { display:flex; flex-direction:column; gap:4px; min-width:200px; max-width:400px; flex:1; }
+.cas-scroll-label { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.05em; padding:0 2px 4px; border-bottom:.5px solid var(--border); display:block; }
+.cas-scroll-list  { max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:1px;
+                    border:.5px solid var(--border2); border-radius:var(--radius); background:var(--bg2); padding:4px 0; }
+.cas-scroll-list::-webkit-scrollbar { width:3px; }
+.cas-scroll-list::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+.cas-scroll-list label { display:flex; align-items:flex-start; gap:7px; padding:5px 10px; cursor:pointer;
+                         font-size:12px; color:var(--text); border-radius:4px; user-select:none; white-space:normal; line-height:1.4; word-break:break-word; }
+.cas-scroll-list label:hover { background:var(--bg3); }
+.cas-scroll-list label input[type=checkbox] { width:13px; height:13px; accent-color:var(--blue); flex-shrink:0; cursor:pointer; }
+.cas-scroll-clear { font-size:11px; color:var(--text3); background:none; border:none; cursor:pointer; padding:0; align-self:flex-end; }
+.cas-scroll-clear:hover { color:var(--red); }
+/* ── MultiSelect checkbox dropdown ── */
+.ms-wrap{position:relative;display:inline-block}
+.ms-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer;font-size:12px;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+.ms-btn:hover{background:var(--bg2)}
+.ms-btn .ms-caret{font-size:9px;opacity:.6;flex-shrink:0}
+.ms-panel{position:absolute;top:calc(100% + 4px);left:0;z-index:500;background:var(--bg);border:.5px solid var(--border2);border-radius:var(--radius-lg);padding:6px 0;min-width:175px;box-shadow:0 8px 24px rgba(0,0,0,.18);display:none}
+.ms-panel.open{display:block}
+.ms-panel label{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:13px;color:var(--text);user-select:none;white-space:nowrap}
+.ms-panel label:hover{background:var(--bg2)}
+.ms-panel label input{accent-color:var(--blue);width:14px;height:14px;cursor:pointer}
+.ms-sep{height:.5px;background:var(--border);margin:4px 0}
+.ms-all-btn{display:block;width:100%;padding:5px 12px;font-size:11px;color:var(--text2);text-align:left;cursor:pointer;background:none;border:none}
+.ms-all-btn:hover{color:var(--text)}
+/* Triệu phú dark variant */
+.mil-ctrl .ms-btn{background:#fff!important;color:#000!important;border-color:rgba(255,255,255,.5)}
+.mil-ctrl .ms-panel{background:#fff;border-color:#ccc}
+.mil-ctrl .ms-panel label{color:#222}
+.mil-ctrl .ms-panel label:hover{background:#f0f0f0}
+.mil-ctrl .ms-sep{background:#ddd}
+.mil-ctrl .ms-all-btn{color:#555}
+.tex-tabular { border-collapse:collapse; font-size:13px; background:var(--bg); color:var(--text); }
+.tex-tabular td { vertical-align:middle; }
+/* v18: responsive tabular wrapper */
+.tex-tabular-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; max-width:100%; margin:8px 0; }
+.tex-tabular-scroll table { min-width:max-content; }
+/* On very narrow screens, scale down tabular */
+@media(max-width:400px){
+  .tex-tabular-scroll { font-size:11px; }
+}
+@media(prefers-color-scheme:dark){ .tex-tabular { background:var(--bg2); } }
+/* ── Panel Tạo đề ── */
+#panel-exam{flex-direction:column}
+.exam-wrap{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.exam-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.exam-grid{grid-template-columns:1fr}}
+.exam-section{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--radius-lg);padding:16px}
+.exam-section-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px}
+.exam-code-big{font-size:48px;font-weight:800;letter-spacing:8px;color:var(--blue);font-family:monospace;text-align:center;padding:16px 0}
+.exam-url-box{font-size:12px;color:var(--text2);text-align:center;word-break:break-all;padding:8px;background:var(--bg);border-radius:var(--radius);border:.5px solid var(--border);margin-top:6px}
+.mon-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:var(--radius);background:var(--bg);margin-bottom:7px}
+#mon-class-table tr:hover td{background:var(--bg2)}
+.mon-score{font-weight:700;font-size:15px}
+.mon-name{font-size:13px;font-weight:500}
+.mon-score{font-size:15px;font-weight:700;min-width:36px;text-align:right}
+.stat-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.stat-box{flex:1;min-width:80px;padding:12px;background:var(--bg);border-radius:var(--radius);text-align:center}
+.stat-box .num{font-size:24px;font-weight:700}
+.stat-box .lbl{font-size:11px;color:var(--text2)}
+.q-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:12px}
+.q-bar-id{font-family:monospace;font-size:10px;color:var(--text2);min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.q-bar-track{flex:1;height:12px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.q-bar-fill{height:100%;border-radius:3px;transition:width .4s}
+.q-bar-pct{min-width:36px;text-align:right;color:var(--text2)}
+/* ════════════════════════════════════════════════════════════
+   BẢNG BIẾN THIÊN  —  sát với LaTeX tkz-tab
+   ════════════════════════════════════════════════════════════ */
+.tkztab-wrap {
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  margin: 18px 0; max-width: 100%; display: inline-block;
+}
+.tkztab {
+  border-collapse: collapse;
+  border: 1.4px solid #111;
+  font-size: 13.5px;
+  background: #fff; color: #111;
+  font-family: 'STIX Two Math', 'Latin Modern Math', 'Computer Modern', Georgia, serif;
+}
+/* Xóa toàn bộ border mặc định — chỉ add có chọn lọc */
+.tkztab td {
+  border: none;
+  text-align: center; vertical-align: middle;
+  padding: 0;
+}
+
+/* ── Cột nhãn ── */
+.tkztab-lbl {
+  font-style: italic;
+  border-right: 1.4px solid #111 !important;
+  padding: 5px 14px 5px 10px;
+  min-width: 40px;
+  white-space: nowrap;
+}
+
+/* ── Hàng x ── */
+.tkztab-xrow { border-bottom: 1.4px solid #111; }
+.tkztab-xval {
+  padding: 5px 10px;
+  min-width: 46px;
+  border-right: 0.8px solid #888; /* gạch đứng tại mỗi giá trị x */
+}
+.tkztab-xlast { border-right: none !important; } /* cạnh phải = viền ngoài */
+.tkztab-xgap  { min-width: 68px; }               /* ô trống hàng x */
+
+/* ── Hàng xét dấu / biến thiên: đường kẻ ngang mỏng ── */
+.tkztab tr.bbt-signrow  { border-bottom: 0.8px solid #bbb; }
+.tkztab tr.bbt-varrow   { /* hàng cuối — viền ngoài lo */ }
+
+/* Ô tại điểm x: gạch đứng mỏng */
+.bbt-pt {
+  padding: 5px 8px;
+  min-width: 28px;
+  border-right: 0.8px solid #bbb;
+}
+.bbt-pt.bbt-ptlast { border-right: none !important; }
+
+/* Ô khoảng (giữa các x): KHÔNG có viền trái/phải */
+.tkztab-gap { min-width: 68px; }
+
+/* ── Dấu xét dấu ── */
+/* + và − trong khoảng: chữ nghiêng toán học cỡ vừa */
+.bbt-pos, .bbt-neg {
+  display: inline-block;
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1;
+}
+/* 0 tại nghiệm */
+.bbt-zero  { font-weight: 700; }
+/* 0 tiếp xúc (t) */
+.bbt-tang  { font-weight: 700; font-style: italic; }
+/* || tại điểm cực (mẫu = 0): hai gạch đứng bằng CSS */
+.bbt-pole {
+  display: inline-block;
+  width: 14px; height: 1.1em;
+  position: relative; vertical-align: middle;
+}
+.bbt-pole::before, .bbt-pole::after {
+  content: '';
+  position: absolute; top: 0; bottom: 0;
+  width: 1.4px; background: #222;
+}
+.bbt-pole::before { left: 3px; }
+.bbt-pole::after  { left: 9px; }
+/* Vạch cấm bất liên tục: hai gạch đứng mảnh */
+.bbt-forbid { position: relative; }
+.bbt-forbid::before, .bbt-forbid::after {
+  content: '';
+  position: absolute; top: 15%; height: 70%;
+  width: 1.2px; background: #666;
+}
+.bbt-forbid::before { left: calc(50% - 4px); }
+.bbt-forbid::after  { left: calc(50% + 2px); }
+
+/* ── Hàng biến thiên ── */
+.bbt-val { font-size: 13px; white-space: nowrap; }
+/* Ô bất liên tục */
+.bbt-disc { padding: 0 !important; position: relative !important; }
+.bbt-disc-inner {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: space-between;
+  padding: 6px 4px; min-height: 56px;
+}
+.bbt-disc-top, .bbt-disc-bot { font-size: 12px; white-space: nowrap; line-height: 1.3; flex-shrink: 0; }
+.bbt-disc-sep {
+  font-size: 16px; color: #555; line-height: 1.1;
+  letter-spacing: -4px; font-weight: 300; flex-shrink: 0;
+}
+
+/* ── Toán học inline (mathify output) ── */
+.bbt-math {
+  font-family: 'STIX Two Math', 'Latin Modern Math', 'Computer Modern', Georgia, serif;
+  font-style: italic;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+.bbt-math sup, .bbt-math sub { font-size: 0.72em; font-style: italic; }
+.bbt-sup { font-size: 0.72em; vertical-align: super; font-style: italic; }
+.bbt-sub { font-size: 0.72em; vertical-align: sub;   font-style: italic; }
+.bbt-frac {
+  display: inline-flex; flex-direction: column;
+  align-items: center; vertical-align: middle;
+  font-size: 0.88em; line-height: 1.15; gap: 0;
+}
+.bbt-frac > sup {
+  font-size: 1em; border-bottom: 0.7px solid currentColor;
+  padding: 0 2px; font-style: inherit; vertical-align: baseline;
+}
+.bbt-frac > sub {
+  font-size: 1em; padding: 0 2px;
+  font-style: inherit; vertical-align: baseline;
+}
+@media(prefers-color-scheme:dark){
+  .tkztab { background:#1c1c1a; color:#e4e4e0; border-color:#888; }
+  .tkztab-lbl { border-color:#888 !important; }
+  .tkztab-xrow { border-color:#888; }
+  .tkztab-xval { border-color:#666; }
+  .bbt-pt { border-color:#555; }
+  .bbt-pole::before,.bbt-pole::after { background:#ccc; }
+  .bbt-forbid::before,.bbt-forbid::after { background:#aaa; }
+  .bbt-disc-sep { color:#aaa; }
+  .tkztab tr.bbt-signrow { border-color:#444; }
+}
+  </style>
+</head>
+<body>
+<div class="app" id="app">
+  <!-- State: waiting | open | closed | result -->
+  <div id="scr-waiting" style="display:none">
+    <div class="countdown" id="countdown-box">
+      <div style="font-size:14px;margin-bottom:8px;opacity:.8">⏳ Đề mở lúc</div>
+      <div class="big" id="countdown-time">--:--:--</div>
+      <div class="lbl" id="countdown-date"></div>
+    </div>
+    <div class="card" style="text-align:center">
+      <h1>Kiểm tra</h1>
+      <p class="meta">21 câu · 45 phút · Chờ đến giờ mở để vào làm bài</p>
+    </div>
+  </div>
+
+  <div id="scr-closed" style="display:none">
+    <div class="card closed-banner">
+      <div class="icon">🔒</div>
+      <h1>Đề đã đóng</h1>
+      <p style="margin-top:8px;color:#6b7280">Hết thời gian nộp bài. Hãy liên hệ giáo viên.</p>
+    </div>
+  </div>
+
+  <div id="scr-login" style="display:none">
+    <div class="card">
+      <h1>📝 Kiểm tra</h1>
+      <p class="meta">21 câu · 45 phút làm bài</p>
+      <div style="margin-top:16px" id="login-form">
+        <!-- Tab switcher (chỉ hiện khi có cả STU_LIST lẫn ALLOW_GUEST) -->
+        <div id="login-tabs" style="display:none;margin-bottom:14px">
+          <div style="display:flex;border-radius:10px;overflow:hidden;border:1.5px solid #e2e8f0;background:#f8fafc">
+            <button id="tab-btn-class" onclick="switchLoginTab('class')"
+              style="flex:1;padding:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:#2563eb;color:#fff;transition:all .2s">
+              🏫 Học sinh lớp
+            </button>
+            <button id="tab-btn-guest" onclick="switchLoginTab('guest')"
+              style="flex:1;padding:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#64748b;transition:all .2s">
+              👤 <span id="tab-guest-label">Khách</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel: Học sinh lớp (chọn tên + mật khẩu) -->
+        <div id="login-list-mode" style="display:none">
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Trường</label>
+          <select id="stu-truong-class" style="width:100%;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:15px;outline:none;background:#fff" onchange="onStuTruongChange()">
+          </select>
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;margin-top:12px">Lớp</label>
+          <select id="stu-lop-select" style="width:100%;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:15px;outline:none;background:#fff" onchange="onStuLopChange()">
+            <option value="">-- Chọn lớp --</option>
+          </select>
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;margin-top:12px">Chọn tên học sinh</label>
+          <select id="stu-select" style="width:100%;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:15px;outline:none;background:#fff"
+                  onchange="onStuSelectChange()">
+            <option value="">-- Chọn tên của bạn --</option>
+          </select>
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;margin-top:12px">Mật khẩu</label>
+          <input id="stu-pw" type="password" placeholder="Nhập mật khẩu..."
+                 style="width:100%;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:15px;outline:none"
+                 onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'"
+                 onkeydown="if(event.key==='Enter')startExam()">
+        </div>
+
+        <!-- Panel: Khách / Khác (nhập tên tự do, chọn lớp + trường) -->
+        <div id="login-free-mode" style="display:none">
+          <div style="padding:10px 12px;background:#eff6ff;border-radius:8px;font-size:12px;color:#1d4ed8;margin-bottom:10px">
+            👤 Tham gia với tư cách <b id="free-mode-label">khách</b> — điền thông tin để bắt đầu.
+          </div>
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Họ và tên</label>
+          <input id="stu-name-free" type="text" placeholder="Nhập họ và tên đầy đủ..."
+                 style="width:100%;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:15px;outline:none"
+                 onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'"
+                 onkeydown="if(event.key==='Enter')startExam()">
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;margin-top:12px">Lớp</label>
+          <input id="stu-lop-free" type="text" placeholder="Nhập lớp đang học, ví dụ: 11A1"
+                 style="width:100%;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:15px;outline:none"
+                 onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'">
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;margin-top:12px">Trường</label>
+          <select id="stu-truong-free" style="width:100%;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:15px;outline:none;background:#fff">
+          </select>
+          <div id="stu-truong-other-wrap" style="display:none;margin-top:8px">
+            <input id="stu-truong-other" type="text" placeholder="Nhập tên trường..."
+                   style="width:100%;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:15px;outline:none"
+                   onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'">
+          </div>
+        </div>
+
+        <p id="login-err" style="color:#ef4444;font-size:12px;margin-top:6px;display:none"></p>
+        <div id="already-done-msg" style="display:none;margin-top:10px;padding:12px;background:#fef3c7;border-radius:8px;font-size:13px;color:#92400e;text-align:center">
+          ⚠️ Bạn đã nộp bài rồi. Mỗi học sinh chỉ được làm 1 lần.
+        </div>
+        <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:12px" onclick="startExam()">
+          🚀 Bắt đầu làm bài
+        </button>
+      </div>
+      <p style="font-size:11px;color:#94a3b8;text-align:center;margin-top:10px">Đề mở ngay · Không hẹn giờ</p>
+    </div>
+  </div>
+
+  <div id="scr-exam" style="display:none">
+    <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1">
+        <div class="timer-txt" id="timer-txt">--:--</div>
+        <div class="timer-bar"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div>
+      </div>
+      <button class="btn btn-g" onclick="confirmSubmit()" id="submit-btn">✅ Nộp bài</button>
+    </div>
+    <div class="dots" id="dot-wrap"></div>
+    <div id="q-area"></div>
+    <div class="nav">
+      <button class="btn btn-ghost" id="btn-prev" onclick="navigate(-1)">◀ Trước</button>
+      <span style="flex:1;text-align:center;font-size:13px;color:#64748b" id="q-pos"></span>
+      <button class="btn btn-ghost" id="btn-next" onclick="navigate(1)">Tiếp ▶</button>
+    </div>
+  </div>
+
+  <div id="scr-result" style="display:none">
+    <div class="card result-card">
+      <div id="result-emoji" style="font-size:48px"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-label" id="result-label"></div>
+      <div style="margin-top:12px;font-size:13px;color:#64748b" id="result-meta"></div>
+      <div id="result-submit-status" style="margin-top:12px;font-size:13px"></div>
+    </div>
+    <div id="result-detail"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ── Config (baked-in) ──────────────────────────────────────────────────────
+var EXAM_CODE   = 'DE12BAI1_002';
+var EXAM_TITLE  = "Kiểm tra";
+var EXAM_DUR    = 45;       // phút
+var SHOW_RES    = 2;
+var SHUFFLE_C   = true;
+var OPEN_AT     = 0;      // ms epoch (0 = mở ngay)
+var CLOSE_AT    = 0;     // ms epoch (0 = không giới hạn)
+var NAV_MODE    = 'no_prev';
+var GSHEET_URL  = "";
+var GFORM_URL     = "https://docs.google.com/forms/d/e/1FAIpQLScB3HTsrDBHCDBLT_66TyPnejFWuDaGM3CrjSmPO6daxhszYw/formResponse";
+var GFORM_ENTRIES = "entry.1376720137, entry.186710587, entry.1081135100, entry.593998462, entry.2081996744, entry.687635544, entry.1516028961, entry.1486464636, entry.1042199068, entry.1025162769, entry.591595109";
+var ALL_QS      = [{"id":"2D1N1-2","qtype":"choice","stem":"[Trích đề thi HK1-Lớp 12-THPT Lương Ngọc Quyến-Thái Nguyên-Năm học 2024-2025]\r<br>\tCho hàm số $y=f(x)$ có bảng biến thiên như hình dưới đây\r<br>\t\r<br> <div class=\"tikz-rendered\"><div class=\"tkztab-wrap\"><table class=\"tkztab\"><tr class=\"tkztab-xrow\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">x</span></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−∞</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−7</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−4</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">4</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval tkztab-xlast\"><span class=\"bbt-math\">+∞</span></td></tr><tr class=\"bbt-signrow\" style=\"height:42px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">y'</span></td><td class=\"bbt-pt\"></td><td class=\"tkztab-gap bbt-neg\"><span>&#x2212;</span></td><td class=\"bbt-pt\"><span class=\"bbt-math\">0</span></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt\"><span class=\"bbt-pole\"></span></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt\"><span class=\"bbt-math\">0</span></td><td class=\"tkztab-gap bbt-neg\"><span>&#x2212;</span></td><td class=\"bbt-pt bbt-ptlast\"></td></tr><tr class=\"bbt-varrow\" style=\"height:104px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">y</span></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">+∞</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"10\" x2=\"66\" y2=\"94\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,94 60.31549046542724,90.68694229580115 64.7096512099436,87.54825604971802\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">14</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"94\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 64.7096512099436,16.45174395028197 60.31549046542724,13.31305770419885\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt bbt-disc\"\n              style=\"height:104px;min-height:104px;padding:0;position:relative\">\n              <div class=\"bbt-disc-inner\">\n                <div class=\"bbt-disc-top\"><span class=\"bbt-math\">+∞</span></div>\n                <div class=\"bbt-disc-sep\" style=\"line-height:1.1\">‖</div>\n                <div class=\"bbt-disc-bot\"><span class=\"bbt-math\">−∞</span></div>\n              </div></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"94\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 64.7096512099436,16.45174395028197 60.31549046542724,13.31305770419885\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">6</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"10\" x2=\"66\" y2=\"94\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,94 60.31549046542724,90.68694229580115 64.7096512099436,87.54825604971802\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt bbt-ptlast\"\n              style=\"height:104px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">−∞</span></span></td></tr></table></div></div>\r<br>\t\r<br>\tHàm số đồng biến trên khoảng nào trong các khoảng sau đây?","choices":[{"text":"$(-7;4)$","correct":false},{"text":"$(-7;+\\infty)$","correct":false},{"text":"$(-\\infty;-4)$","correct":false},{"text":"$(-7;-4)$ và $(-4;4)$","correct":true}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1N2-2","qtype":"choice","stem":"[Trích đề thi thử Chuyên KHTN-Hà Nội- Lần 2-Năm học 2024-2025]\r<br>\tCho hàm số $y=f(x)$ có bảng biến thiên như sau\r<br>\t\r<br> <div class=\"tikz-rendered\"><div class=\"tkztab-wrap\"><table class=\"tkztab\"><tr class=\"tkztab-xrow\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">x</span></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−∞</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−2</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">1</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval tkztab-xlast\"><span class=\"bbt-math\">+∞</span></td></tr><tr class=\"bbt-signrow\" style=\"height:42px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">f'x</span></td><td class=\"bbt-pt\"></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt\"><span class=\"bbt-zero\">0</span></td><td class=\"tkztab-gap bbt-neg\"><span>&#x2212;</span></td><td class=\"bbt-pt\"><span class=\"bbt-zero\">0</span></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt bbt-ptlast\"></td></tr><tr class=\"bbt-varrow\" style=\"height:78px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">fx</span></td><td class=\"bbt-pt\"\n              style=\"height:78px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">−∞</span></span></td><td class=\"bbt-arrow\" style=\"height:78px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"78\" viewBox=\"0 0 72 78\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"68\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 63.56262940519351,16.111401196417454 59.80951008221715,12.228863965752248\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:78px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">21</span></span></td><td class=\"bbt-arrow\" style=\"height:78px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"78\" viewBox=\"0 0 72 78\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"10\" x2=\"66\" y2=\"68\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,68 59.80951008221715,65.77113603424775 63.56262940519351,61.888598803582546\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:78px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">−6</span></span></td><td class=\"bbt-arrow\" style=\"height:78px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"78\" viewBox=\"0 0 72 78\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"68\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 63.56262940519351,16.111401196417454 59.80951008221715,12.228863965752248\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt bbt-ptlast\"\n              style=\"height:78px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">+∞</span></span></td></tr></table></div></div>\r<br>\t\r<br>\tĐiểm cực đại của hàm số đã cho là","choices":[{"text":"$21$","correct":false},{"text":"$1$","correct":false},{"text":"$-2$","correct":true},{"text":"$-6$","correct":false}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1H2-1","qtype":"choice","stem":"[Trích đề thi HK1-Lớp 12 -THPT Tam Phu-Tp HCM-Năm học 2024-2025]\r<br>\tHàm số nào dưới đây <strong>không</strong> có cực trị?","choices":[{"text":"$y=x^2-2x+1$","correct":false},{"text":"$y=\\dfrac{x^2+1}{x}$","correct":false},{"text":"$y=-x^3+x+1$","correct":false},{"text":"$y=\\dfrac{2x-2}{x+1}$","correct":true}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1N1-2","qtype":"choice","stem":"[Trích đề thi khảo sát-Sở Thừa Thiên Huế-Năm học 2024-2025]\r<br>\tCho hàm số $y=f(x)$ có bảng biến thiên như sau:\r<br>\t\r<br> \\resizebox{0.7\\linewidth}!<div class=\"tikz-rendered\"><div class=\"tkztab-wrap\"><table class=\"tkztab\"><tr class=\"tkztab-xrow\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">x</span></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−∞</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−3</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">0</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">3</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval tkztab-xlast\"><span class=\"bbt-math\">+∞</span></td></tr><tr class=\"bbt-signrow\" style=\"height:42px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">f'x</span></td><td class=\"bbt-pt\"></td><td class=\"tkztab-gap bbt-neg\"><span>&#x2212;</span></td><td class=\"bbt-pt\"><span class=\"bbt-zero\">0</span></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt\"><span class=\"bbt-zero\">0</span></td><td class=\"tkztab-gap bbt-neg\"><span>&#x2212;</span></td><td class=\"bbt-pt\"><span class=\"bbt-zero\">0</span></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt bbt-ptlast\"></td></tr><tr class=\"bbt-varrow\" style=\"height:130px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">fx</span></td><td class=\"bbt-pt\"\n              style=\"height:130px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">+∞</span></span></td><td class=\"bbt-arrow\" style=\"height:130px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"130\" viewBox=\"0 0 72 130\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"10\" x2=\"66\" y2=\"120\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,120 60.75656916904772,116.02552731535125 65.4972052627854,113.43972580967615\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:130px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">−1</span></span></td><td class=\"bbt-arrow\" style=\"height:130px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"130\" viewBox=\"0 0 72 130\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"120\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 65.4972052627854,16.560274190323852 60.75656916904772,13.974472684648758\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:130px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">1</span></span></td><td class=\"bbt-arrow\" style=\"height:130px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"130\" viewBox=\"0 0 72 130\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"10\" x2=\"66\" y2=\"120\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,120 60.75656916904772,116.02552731535125 65.4972052627854,113.43972580967615\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:130px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">−1</span></span></td><td class=\"bbt-arrow\" style=\"height:130px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"130\" viewBox=\"0 0 72 130\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"120\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 65.4972052627854,16.560274190323852 60.75656916904772,13.974472684648758\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt bbt-ptlast\"\n              style=\"height:130px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">+∞</span></span></td></tr></table></div></div>\r<br>\t\r<br>\tHàm số đã cho đồng biến trên khoảng nào dưới đây?","choices":[{"text":"$(-\\infty;-3)$","correct":false},{"text":"$(-3;3)$","correct":false},{"text":"$(0;3)$","correct":false},{"text":"$(-3;0)$","correct":true}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1H1-1","qtype":"choice","stem":"[Trích đề thi HK1-Lớp 12-THPT Đinh Tiên Hoàng-Tỉnh Ninh Bình-Năm học 2024-2025]\r<br>\tCho hàm số $=f(x)$ có đạo hàm $f'(x)=x^2-4x$, $\\forall x\\in \\mathbb{R}$. Khẳng định nào sau đây đúng?","choices":[{"text":"$f(4)&gt;f(0)$","correct":false},{"text":"$f(5)&gt;f(6)$","correct":false},{"text":"$f(0)&gt;f(2)$","correct":true},{"text":"$f(4)&gt;f(2)$","correct":false}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1H2-1","qtype":"choice","stem":"[Trích đề thi HK1-Lớp 12 -THPT Lê Trọng Tấn-TPHCM-Năm học 2024-2025]\r<br>\tCho hàm số $f(x)$ có đạo hàm là $f'(x)=x(x-1)(x+2)^2$, $\\forall x \\in \\mathbb{R}$. Số điểm cực trị của hàm số là?","choices":[{"text":"$5$","correct":false},{"text":"$2$","correct":true},{"text":"$1$","correct":false},{"text":"$3$","correct":false}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1H1-2","qtype":"choice","stem":"[Trích đề thi HK1-Lớp 12 -THPT Nguyễn Thái Bình-TPHCM-Năm học 2024-2025]\r<br>\tCho hàm số $y=f(x)$ có bảng biến thiên\r<br>\t\r<br> <div class=\"tikz-rendered\"><div class=\"tkztab-wrap\"><table class=\"tkztab\"><tr class=\"tkztab-xrow\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">x</span></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−∞</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−1</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">1</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval tkztab-xlast\"><span class=\"bbt-math\">+∞</span></td></tr><tr class=\"bbt-signrow\" style=\"height:42px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">y'</span></td><td class=\"bbt-pt\"></td><td class=\"tkztab-gap bbt-neg\"><span>&#x2212;</span></td><td class=\"bbt-pt\"><span class=\"bbt-zero\">0</span></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt\"><span class=\"bbt-zero\">0</span></td><td class=\"tkztab-gap bbt-neg\"><span>&#x2212;</span></td><td class=\"bbt-pt bbt-ptlast\"></td></tr><tr class=\"bbt-varrow\" style=\"height:109px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">y</span></td><td class=\"bbt-pt\"\n              style=\"height:109px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">+∞</span></span></td><td class=\"bbt-arrow\" style=\"height:109px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"109\" viewBox=\"0 0 72 109\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"10\" x2=\"66\" y2=\"99\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,99 60.40727770569401,95.53424505500278 64.88480949753719,92.51568429645683\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:109px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">0</span></span></td><td class=\"bbt-arrow\" style=\"height:109px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"109\" viewBox=\"0 0 72 109\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"99\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 64.88480949753719,16.484315703543185 60.40727770569401,13.465754944997219\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:109px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">4</span></span></td><td class=\"bbt-arrow\" style=\"height:109px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"109\" viewBox=\"0 0 72 109\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"10\" x2=\"66\" y2=\"99\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,99 60.40727770569401,95.53424505500278 64.88480949753719,92.51568429645683\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt bbt-ptlast\"\n              style=\"height:109px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">−∞</span></span></td></tr></table></div></div>\r<br>\t\r<br>\tChọn khẳng định đúng?","choices":[{"text":"Hàm số đồng biến trên $(-1; 1)$","correct":true},{"text":"Hàm số đồng biến trên $(-\\infty;-1)$","correct":false},{"text":"Hàm số nghịch biến trên $(-1; 1)$","correct":false},{"text":"Hàm số nghịch biến trên $(-1;+\\infty)$","correct":false}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1N2-2","qtype":"choice","stem":"[Trích đề thi khảo sát-Sở Hậu Giang-Năm học 2024-2025]\r<br>\tCho hàm số bậc ba $y=f(x)$ có bảng biến thiên như hình vẽ bên dưới\r<br>\t\r<br> <div class=\"tikz-rendered\"><div class=\"tkztab-wrap\"><table class=\"tkztab\"><tr class=\"tkztab-xrow\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">x</span></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−∞</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">1</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">2</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval tkztab-xlast\"><span class=\"bbt-math\">+∞</span></td></tr><tr class=\"bbt-signrow\" style=\"height:42px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">y'</span></td><td class=\"bbt-pt\"></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt\"><span class=\"bbt-math\">0</span></td><td class=\"tkztab-gap bbt-neg\"><span>&#x2212;</span></td><td class=\"bbt-pt\"><span class=\"bbt-math\">0</span></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt bbt-ptlast\"></td></tr><tr class=\"bbt-varrow\" style=\"height:104px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">y</span></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">−∞</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"94\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 64.7096512099436,16.45174395028197 60.31549046542724,13.31305770419885\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">0</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"10\" x2=\"66\" y2=\"94\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,94 60.31549046542724,90.68694229580115 64.7096512099436,87.54825604971802\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">−1</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"94\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 64.7096512099436,16.45174395028197 60.31549046542724,13.31305770419885\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt bbt-ptlast\"\n              style=\"height:104px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">+∞</span></span></td></tr></table></div></div>\r<br>\t\r<br>\tHàm số đã cho đạt giá trị cực đại tại điểm","choices":[{"text":"$x=-1$","correct":false},{"text":"$x=0$","correct":false},{"text":"$x=2$","correct":false},{"text":"$x=1$","correct":true}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1H1-3","qtype":"choice","stem":"[Trích đề thi GHK1-Lớp 12 -THPT Tam Phu-TP HCM-Năm học 2024-2025]\r<br>\tCó tất cả bao nhiêu số nguyên $m$ để hàm số $y=\\dfrac{(m+1) x-2}{x-m}$ đồng biến trên từng khoảng xác định của nó?","choices":[{"text":"$1$","correct":false},{"text":"$3$","correct":false},{"text":"$0$","correct":false},{"text":"$2$","correct":true}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1N2-2","qtype":"choice","stem":"[Trích đề thi khảo sát-Sở Bà Rịa Vũng Tàu-Năm học 2024-2025]\r<br>\tCho hàm số $y=f(x)$ có bảng biến thiên như sau\r<br>\t\r<br> <div class=\"tikz-rendered\"><div class=\"tkztab-wrap\"><table class=\"tkztab\"><tr class=\"tkztab-xrow\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">x</span></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−∞</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−2</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">0</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">2</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval tkztab-xlast\"><span class=\"bbt-math\">+∞</span></td></tr><tr class=\"bbt-signrow\" style=\"height:42px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">y'</span></td><td class=\"bbt-pt\"></td><td class=\"tkztab-gap bbt-neg\"><span>&#x2212;</span></td><td class=\"bbt-pt\"><span class=\"bbt-math\">0</span></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt\"><span class=\"bbt-math\">0</span></td><td class=\"tkztab-gap bbt-neg\"><span>&#x2212;</span></td><td class=\"bbt-pt\"><span class=\"bbt-math\">0</span></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt bbt-ptlast\"></td></tr><tr class=\"bbt-varrow\" style=\"height:104px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">y</span></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">+∞</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"10\" x2=\"66\" y2=\"94\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,94 60.31549046542724,90.68694229580115 64.7096512099436,87.54825604971802\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">1</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"94\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 64.7096512099436,16.45174395028197 60.31549046542724,13.31305770419885\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">3</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"10\" x2=\"66\" y2=\"94\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,94 60.31549046542724,90.68694229580115 64.7096512099436,87.54825604971802\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">1</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"94\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 64.7096512099436,16.45174395028197 60.31549046542724,13.31305770419885\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt bbt-ptlast\"\n              style=\"height:104px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">+∞</span></span></td></tr></table></div></div>\r<br>\t\r<br>\tGiá trị cực đại của hàm số đã cho là","choices":[{"text":"$2$","correct":false},{"text":"$3$","correct":true},{"text":"$1$","correct":false},{"text":"$0$","correct":false}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1N1-2","qtype":"choice","stem":"[Trích đề thi khảo sát-Sở Hải Dương-Năm học 2024-2025]\r<br>\tCho hàm số $y=f(x)$ có bảng biến thiên như sau\r<br>\t\r<br> <div class=\"tikz-rendered\"><div class=\"tkztab-wrap\"><table class=\"tkztab\"><tr class=\"tkztab-xrow\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">x</span></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−∞</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−1</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">0</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval tkztab-xlast\"><span class=\"bbt-math\">+∞</span></td></tr><tr class=\"bbt-signrow\" style=\"height:42px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">f'x</span></td><td class=\"bbt-pt\"></td><td class=\"tkztab-gap bbt-neg\"><span>&#x2212;</span></td><td class=\"bbt-pt\"><span class=\"bbt-math\">0</span></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt\"><span class=\"bbt-math\">0</span></td><td class=\"tkztab-gap bbt-neg\"><span>&#x2212;</span></td><td class=\"bbt-pt bbt-ptlast\"></td></tr><tr class=\"bbt-varrow\" style=\"height:104px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">fx</span></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">+∞</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"10\" x2=\"66\" y2=\"94\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,94 60.31549046542724,90.68694229580115 64.7096512099436,87.54825604971802\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">0</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"94\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 64.7096512099436,16.45174395028197 60.31549046542724,13.31305770419885\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">2</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"10\" x2=\"66\" y2=\"94\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,94 60.31549046542724,90.68694229580115 64.7096512099436,87.54825604971802\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt bbt-ptlast\"\n              style=\"height:104px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">−∞</span></span></td></tr></table></div></div>\r<br>\t\r<br>\tKhẳng định nào dưới đây là đúng?","choices":[{"text":"Hàm số nghịch biến trên khoảng $(-1;+\\infty)$","correct":false},{"text":"Hàm số đồng biến trên khoảng $(-1;0)$","correct":true},{"text":"Hàm số nghịch biến trên khoảng $(-\\infty;0)$","correct":false},{"text":"Hàm số đồng biến trên khoảng $(0;2)$","correct":false}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1N1-2","qtype":"choice","stem":"[Trích đề thi khảo sát-Sở Hưng Yên-Năm học 2024-2025]\r<br>\tCho hàm số $y=f(x)$ có bảng biến thiên như hình vẽ bên dưới.\r<br>\t\r<br> <div class=\"tikz-rendered\"><div class=\"tkztab-wrap\"><table class=\"tkztab\"><tr class=\"tkztab-xrow\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">x</span></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−∞</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">−2</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval\"><span class=\"bbt-math\">3</span></td><td class=\"tkztab-xgap\"></td><td class=\"tkztab-xval tkztab-xlast\"><span class=\"bbt-math\">+∞</span></td></tr><tr class=\"bbt-signrow\" style=\"height:42px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">f'x</span></td><td class=\"bbt-pt\"></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt\"><span class=\"bbt-zero\">0</span></td><td class=\"tkztab-gap bbt-neg\"><span>&#x2212;</span></td><td class=\"bbt-pt\"><span class=\"bbt-zero\">0</span></td><td class=\"tkztab-gap bbt-pos\"><span>+</span></td><td class=\"bbt-pt bbt-ptlast\"></td></tr><tr class=\"bbt-varrow\" style=\"height:104px\"><td class=\"tkztab-lbl\"><span class=\"bbt-math\">fx</span></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">−∞</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"94\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 64.7096512099436,16.45174395028197 60.31549046542724,13.31305770419885\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">4</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"10\" x2=\"66\" y2=\"94\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,94 60.31549046542724,90.68694229580115 64.7096512099436,87.54825604971802\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt\"\n              style=\"height:104px;vertical-align:bottom;padding:2px 6px 9px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">2</span></span></td><td class=\"bbt-arrow\" style=\"height:104px;width:72px;min-width:72px;max-width:72px;padding:0;border:none;overflow:visible\"><svg width=\"72\" height=\"104\" viewBox=\"0 0 72 104\"\n              style=\"display:block;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\">\n              <line x1=\"6\" y1=\"94\" x2=\"66\" y2=\"10\"\n                stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n              <polygon points=\"66,10 64.7096512099436,16.45174395028197 60.31549046542724,13.31305770419885\"\n                fill=\"currentColor\"/>\n            </svg></td><td class=\"bbt-pt bbt-ptlast\"\n              style=\"height:104px;vertical-align:top;padding:9px 6px 2px\">\n              <span class=\"bbt-val\"><span class=\"bbt-math\">+∞</span></span></td></tr></table></div></div>\r<br>\t\r<br>\tHàm số $y=f(x)$ đồng biến trên khoảng nào dưới đây?","choices":[{"text":"$(-1;2)$","correct":false},{"text":"$(-8;-3)$","correct":true},{"text":"$(-\\infty; 4)$","correct":false},{"text":"$(2;+\\infty)$","correct":false}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1H2-1","qtype":"choiceTF","stem":"[Trích đề thi GHKI-lớp 12-THPT Phan Chu Trinh- Bình Thuận-Năm học-2024-2025]\r<br>\tCho hàm số $f(x)=x^3-3x^2+3$.","choices":[{"text":"Hàm số nghịch biến trên khoảng $\\left(0;2\\right)$","correct":true},{"text":"$f\\left(10^6\\right)&lt;f\\left(10^8\\right)$","correct":true},{"text":"Hàm số đạt cực đại tại $x=2$","correct":false},{"text":"Tổng giá trị cực đại và giá trị cực tiểu của hàm số bằng $2$","correct":true}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1H5-8","qtype":"choiceTF","stem":"[Trích đề thi khảo sát lần 1-Lớp 12 -SỞ LÀO CAI-Năm học 2024-2025]\r<br>\tKhi loại thuốc A được tiêm vào bệnh nhân, nồng độ $(\\mathrm{mg} / \\mathrm{l})$ của thuốc trong máu sau $x$ phút kể từ khi bắt đầu tiêm được xác định bởi công thức $C(x)=\\dfrac{30 x}{x^2+2}$.<br>\r<br>\tNguồn: James Stewart, J. (2015. Calculus. Cengage Learning)","choices":[{"text":"Thời điểm $1$ phút sau khi tiêm, nồng độ thuốc trong máu là $10(\\mathrm{mg} / \\mathrm{l})$","correct":true},{"text":"Đạo hàm của hàm số $C(x)$ là $C'(x)=\\dfrac{-30x^2+60}{\\left(x^2+2\\right)^2}$","correct":true},{"text":"Trong khoảng thời gian từ $1$ phút sau khi tiêm trở đi, nồng độ thuốc trong máu giảm dần","correct":false},{"text":"Nồng độ thuốc trong máu đạt giá trị lớn nhất tại thời điểm $2$ phút sau khi tiêm","correct":false}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1V2-2","qtype":"choiceTF","stem":"[Trích đề thi HKI -Lớp 12 -THPT-Nguyễn Khuyến-TpHCM-Năm học 2024-2025]<br>\t<div class=\"immini-wrap\"><div class=\"immini-text\">Hàm số $y=f(x)$. Đồ thị của hàm số $y=f'(x)$ như hình bên. Khi đó:<br> </div><div class=\"immini-fig\"><div class=\"tikz-rendered\"><img src=\"data:image/png;base64,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0dHDzZs3L1y48GpfqgpF+48Ez/N79+794osv1q5d22rULzg4uLKycuLEiV1u0PE8n5aWlpycTG9955135uTkoHl4NXa7ned5s9kcFxdH5MfhcCQmJtrt9oiICLokzi0tRHmFQno0klKp9P5kgrh4no+JiRFG6OgB0OPGjSsrKxs+fHjzs66EUEhnftudAKEh9dixY9OnT3fjUVl2u91gMOTk5NAK7N69e+bMmW65su/heT4rK0s+X+et2Gw2jUYjfBm7JyA6PayxsVGr1XarigAAzTidTvqNTnsnbukye3yJ9a5du9quqAAA6DKO44Sy6Qo6o6LRaJr/qHOcHoZWIQC4l9PpXLdunXtbhfIaK5TVbEnXXG3axPvsdrtWqz158iR+ce0urJNzQraioiKtVuvesUKpPPfeQf85hYSEyHPqja1QKCwC5Xleo9Hk5eXJaqbrahAKeZ5fsWKF22eQZbfEmg4rIBQyQaVS2e32qVOn0uhst9uxwsZqtdJ/+fKMg4SQBx54YNGiRW4MgnIMhUePHqUbIcSuCLhKpVIJZz1rtdrKykpsWJaz9PR0lUoVEhLi9m8CeSXponPZI0aMELsi0AnBwcEcxykUihkzZmRmZopdHRDTww8/zHGcJ1rEMgqFOByHXQaDIT4+nk6edH21hE/Iz883GAzp6elEllQeGyGRUSjE4ThMS0tLs1gsdBOhnLPS2u12k8kkpN0Ed8GwC7DBz88vICBg2rRpRqOxuroa8yfgXjJqFQpfpLKdemOdWq1et26dwWCgo4dEljD15yFMtgovXLjQo0cPzCRSTU1NlZWV5eXlv/zyy8033zx27FifyW/scDha/Zbj4uIsFktFRUV0dHRYWBjTbcOGhobevXt39lM+OfX37bff/ve//7Xb7dOmTXvkkUd69OhB831kZmaeOnVq0qRJer2+V69eHq0DS63CCxcuPP/88xqNxt/fv0+fPuPGjXvssce+//57Fz9eWlpKF2QQX3Ho0KG///3vo0ePfumllw4ePHj69OmtW7eGhIRMnTp1x44dhHHbt28fNGjQ+fPnW70eEBAQHR2t1+uzs7MJa3777bdXX311xowZs2fPDg8PDwoKCg8Pz8nJITKWmprKcdzixYtfeOEFo9E4d+7cS5cuffzxx6+99prBYEhJSXn//fcfeOABj9fDyYjS0tI//elPq1evttvtTqfz5MmTGzZsuPHGG3v27Pncc89dunRJVgkvq6ur9Xr9oEGD3n333fPnzzf/0W+//ZaQkKBQKBYtWnThwoXOXlncR4Ln+dLS0vfee+/Pf/4zfT5ra2vbvk3IvJuXl+dkxw8//DBp0qTNmzdfvHiRvlJTU3P//ffTZcOuJKxtbGykfy07duxw+oQXX3zx7bffFv5Iv95eeOGFOXPm0H/Uzz//PCGkd+/enk7oy0YovHjx4vjx461Wa6vXDx06RJvNq1evlk8ozMzMHDBgQFhY2MmTJ6/2nmeeeYYQsnDhQoZC4SuvvNK7d++goKCYmJg33nijg1DY2NhIs5H7+/uzkvK6oaFhypQpx48fb/V6bW0tXd21ZMmSa16EZoqkKSOd7Dty5MjixYubv/LDDz/Q/8H9+/fTV/75z38SQpYtW+bpyrARCl999dUXX3yx3R8tW7aMENKzZ8+CggJXLmU0Gp0sW7NmjUKhmDt3bqvGYCt1dXX0RJHMzMxOXV8iHYWvv/66g1DodDqFEQBWfqG0F/x///d/ZWVlrX5Em8BKpVJoLcokFM6fP//HH39s/sr//vc/ejBv837e6dOnvVAZNsYKt2zZEhAQ0HbYiBASExNDCGlsbHznnXeIr3vllVcSEhJCQkK2bdvW8Shynz59/va3vxFCVq5cSXxReHi4Vqt1Op0Gg4EmJ5e4Y8eOEUJ++umntsO4t99+O80yUFxc7OLV3JU5XFzTpk0bPnx422UeoaGhCoVCePGmm27yRm2cktfQ0ECnEcPCwtr+lM4mE0Lopv2rEQ4eYmt0qbnPPvtMoVDccMMNJSUlrrz/448/pr/iI0eOuH4XVlqFtIlEC0wc2mWz2SZMmHD33XefOHGi3aEbhUJx7ty5ji8ipG52+qjpV46IeP/9971/awZahZcuXaKFgoKCtj+9/vrr+/XrR+fmOriIsD+h1UGUrCgrK3vkkUecTmdSUtLIkSNd+Yiw9Gzv3r3EF6nVaroVLzk5WfoNw8DAwAMHDnz77be33nprqx8dPHiQHtDat29fImMXLlygx5SLcsQzA6Hwxhtv3LBhw/z589tdVXv27NkzZ874/KLTxMTEs2fPBgQE/OMf/3DxI4MHD26149D3hIWFmUwmvV7Pbrg/fPgwXRD22muvEXn7+uuvz58/f9tttw0bNsz7d2djlfJfr2j3R/QblRAyceJEX83ylpeXt337dkLIokWLevbs6eKnhIbw2bNniY9SqVQpKSlJSUmMpjKl51gqFIrXXnvNlaaQ2WwWjl31PXuvfJ/de++9otydgVZhx959913a7X3yySeJj1q1ahUdS7ra90G7fv75Z1rwmc0n7UpMTKSFFStWEHacPXvWYrFERkZWVVV99NFHrjf2fdiePXsIIffcc0/zF5uamqKiorxwd7ZDYVlZGZ0ceP311zueU6upqbHZbCxmNLHb7V9++SUhZNKkSRqNxvUPfvfdd7QgSnfDa5RK5apVqxQKhclkYuL3W1xcHBkZGRER8Ze//OXw4cPJyclz5swh8lNfX79161Z6dg2dH8vLyyOEjBs3rvnbtm/f7qVUUk6WzZo1ixDyzDPP+PD66n//+9/0N5WYmNipD9533330gxaLxfVPMTSDLKivr6dvZmIqubmysrLJkyf369eP4zhX3k8XlrOylLJjY8eOpWNf9I/p6el01qj5ukue5+fMmSMs//AohluFb7755q5du5544onVq1cT37V//35a6NQhR42NjfQ7dvDgwVOmTCE+TalU0iCYlJQk/ank5jQaze7du2+++WaDweBKB1+lUjE3HtquixcvlpSUKBSK0NBQQkhlZeVXX321detWQsi+ffvoexoaGp566qmkpCQvLaL0UIg9efLkLbfcckOXjBs37prX37VrV48ePZYsWeLK7mOn00nHy9atW+dkjTCK/MMPP7j+qU8++YR+KjY2tlO3Y7FVSJtLtMBcw9DpdNJdhgqFYs+ePa683zdahampqVOmTHnvvfdSU1MjIyN/+eUX+uLIkSPffvvt1atXz5kz58CBA16rjwdPevz000/r6uq68MHAwMBp06Z18IZDhw5Nnz49Njb21VdfdfGadPG60Whk7jjdkSNH0pw6Z8+epSsoXXHfffft3LlToVB8++23d911F3OHf+bn59PGbG1tbf/+/V35CMdxZrPZZDLV19eztRmjpKTkjjvuoJOnubm5V3ubcOAfi3Pl7frll18KCgoGDhw4YcIEulGCEHLq1KmDBw/edNNNd911l/CiNzhZU15efuutt7qSf6E5+j/L4tfpbbfdRjdZu/6R0tJS+gzRVdmdwmirsPn+XGn+lktKSj799NN2dxkLnfq+ffs2NTVdc3eNb2xAlhrGxgp//fXX8PDwF1544dlnn231o/Xr11/tUzabjRbo2alsueWWW+gCNGHXzTU988wzTU1NvXv3fumll4hsqNXq0NDQ8vLysLAw4UgviTh69GhQUNC8efPaXfJ14403Xn/99YSQurq606dPi1FBYGoxTUNDw7x5855++um2z9PZs2dZTOTpikmTJtGWmosrRXJzc7dt20YI2bhxY2BgIJGTlStXqtVqlUpF929Jx9GjR5uammjHv+1PeZ6/ePEizcp38803X+0iOJHCo5gJhU1NTQaD4fHHH1+8eHHbn1qtVjra0i5hyJLF/O8RERG08M0331zzzSdPnnzsscfoypvo6GgiMzqdjp6Kt2TJEiIlo0aNuu6668aPH9/u6DbN0U9/19ddx8w/SR/DxsY7IbFlr169hOQcNFODw+Goq6v74IMPOnj6i4qKaIGt0XQqNDT0rrvuOnjwYGZmJs14fDX19fURERE//fRTbGws6wuMhB5uZ7u69NgTqc0taLXae++9NyYmRvhia27Dhg2EkP79+//rX/8So3ZwhZMFriTd62AhMeupjQ4cONCrV6+ePXsePnz4au/5+eefp02bplAoXnnlle7cSwp/S6dPn46Li6O/sjfeeKOurs71zwop7+Pj451SYrfb77zzzrZTOnv27FEoFD169Ni6dauvbhNggvjP/TW5mFilg1S3KSkptHnlZNbHH398ww03aDSa7777ru1Pd+zYMXjw4LFjx+7bt6+bNxIxFGZnZw8cOLBfv359+/bt169f/yvoH/v37z9gwIC2mf7aJSwt9M4uBddVVVU9+uijU6ZMef3113dd8eyzz/bs2VOr1bqygA6h0KMY6CAHBAR0c6UbTQ7M4kChYMGCBWq1OiEhYcqUKU8//XRYWNioUaNOnjxZUFDw1ltvKRSKpKSkJ554gukDUUNDQ2tqarp/ndjYWFrYtGmT0LqUgoCAgP/85z/Hjx/ft2/fjh07qqurhwwZ8tFHH913332u/+KYfoyljOF/OXJz99135+XlFRQUfP7551u3bq2rqxs2bFhgYOCWLVvGjBkjdu0kRKVSpaenW63W3NxcSYVCKuiKLnzQZDIRQiZPnuyBSgGRxNYCT7Pb7TzPW61W5raaeJ9Edpt0k8VioRuW8vLyOrV3W8rY3THFBFnM3PvMJnZw0eTJk/39/fV6fUVFBfEJwkw6PSkU3A4dZPBBfn5+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\" class=\"tikz-img\" alt=\"TikZ figure\"></div></div></div>","choices":[{"text":"Hàm số $y=f(x)$ có $4$ điểm cực trị","correct":false},{"text":"Hàm số $y=f(x)$ đồng biến trên khoảng $(-\\infty;-2)$","correct":false},{"text":"Hàm số $g(x)=f\\left(x^2\\right)$ đồng biến trên khoảng $\\left(\\sqrt{5};+\\infty\\right)$","correct":true},{"text":"Hàm số $g(x)=f\\left(x^2\\right)$ có $5$ điểm cực trị","correct":true}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1V1-2","qtype":"choiceTF","stem":"[Trích đề thi GKI -Lớp 12 -THPT Lê Thánh Tông- Tp HCM-Năm học 2024-2025]<br>\t<div class=\"immini-wrap\"><div class=\"immini-text\">Hàm số $y=f(x)$ xác định và liên tục trên $\\mathbb{R}$. Hàm số $f'(x)$ có đồ thị như sau.<br> </div><div class=\"immini-fig\">\n\t\t<div class=\"tikz-rendered\"><img src=\"data:image/png;base64,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77LSgHXr1hUXF58/f/7OnTtPPPHEuHHjZs2a5XDm1VuuXr169+7dAQMGPPnkkwih48ePjx07duXKldeuXaupqcGPuXHjxtq1a7du3eq7Zgi57+CJGzdu4AM8ze6kc+fOlZeXI4SeffbZoUOH+qx1BDl79mxGRsbjjz+en5+Pk1BZFBgY+PLLL9tstoSEhKioqNLSUmYbBO+Kjo6eN29eYGBgWVnZn/70p/r6+vfee6+lpeXq1au/+93vli5devny5W+++SYnJ8fnI982gfIkUZIZc3IpH27ZsmW4q/KPf/zD+Wdx5yNgN1eysxs3bgwdOnTSpEm3b9+2cca9e/dwft20adN8umqzqqoqPz/f7rv0zTffHD161KUvmCcEe2XhCabL0NLS4uRTLl26hGPKSy+9hNMlgScaGhpmzpw5evToEydOsD6L2VFgYOD06dPxSCGTVe0LI0eOnD17tt13acSIEbNmzfLbF0yw0SE6OlqlUrmXRv3444/j+cgffvjByaf88Y9/bGtri4qKeuedd9w4I+ioubl53rx5YWFhR48exZsk+78Bf/nLX65everwXmac+9y5c0jQBBsdVqxYQVGUe2nUQUFBeCLz73//uzOPf+utt06dOvXwww8fPny4X79+bpwRMGw229KlS4ODgz/++GO7sYbc3Fz/5EouW7Zs7ty54eHhRqOx871MWn1X4UMwBBsdPPT666/j64UrV650/0itVvvf//3fMpnsxIkTPhqmIkpKSkrfvn3/7//+r3Odzn379vXt29cPbTAYDDjN4fz5811tsIYQ8nXWA+uEGR08TKPG6wIXLlzY1ta2bt26bh72wQcfvPDCCyNHjjxz5gwrs/EC884779y5c2fv3r2dM00bGxudHwbyUERExJAhQ1QqVXx8fFexQyQSPfvss0jQhDmjaTKZ8H5E7qVRY3v37q2rq8vLywsJCXnrrbd69erV8d66urqUlBSdTvfHP/4xPT1dANsfWa1W5r+s0Gq1e/fuTU1NxYtrMabGZHFxcVhYmH9akpSUVFNTk5ub23ka9cqVK8XFxQih5ORkXMtDyGxCRNO03YF7Wlpa1q9f379//8cee2zfvn1ff/01TdPHjh179dVXhwwZ8rvf/a6iosLDpnLhI2hra7t69SouUti3b9+//e1vLS0tfm7D559/bhd/O/NpwRU7mZmZ8fHx33//fccbm5ubZ8yYgRAaP378vXv3bEInzO3hCwoKZs2ahX8J3ciVtNPQ0PDZZ5+dPXu2tra2f//+ISEho0aNmjlzplcGIEUiNj+C9evX79ixo6WlRfQTJmCJxWK5XM4sWPa18PDw6urq7h9z8ODBBQsW+Kc9CCGKot5+++0JEybExcX98pe/pGl669atFRUVb7zxxrp161jPzvIDYUYHiqLUajXiA3ajA+hec3PzsWPHKioqqqqqevXqNXr06Pnz5z/yyCOIDMIcdwDAKwIDA+e1Q0QS5pxFfn6+SCTiS/cBAG4SZnQAAHhOyNEBtrQEwBPCjA4eVqMGAAg2OgAAPCfA6MBk+3Fq5S8AvBMg4MpOeP9FAIB7BBgdAABeIcDogMtJw5wFAB4SYHRg6vYKYN0kACwSYHQAAHiFAKMDXuqHS4MCANwmwOhQVVUFgw4AeE6A0QEA4BUCjA5ZWVk0TUdHR7PdEAD4TYD1HaTtgoKC2G4IAPwGhYlYZjabYeYVcBNEBwAAMeMOAACvgOgAAHAMogMAwDGIDgAAxyA6AAAcg+gAAHAMogMAwDGIDgAAxyA6AAAcg+gAAHAMogMAwDGIDgAAxyA6AAAcg+gAAHAMogMAADn0/0wj7m6bLiXYAAAAAElFTkSuQmCC\" class=\"tikz-img\" alt=\"TikZ figure\"></div>\n\t</div></div>","choices":[{"text":"Hàm số $y=f(x)$ đồng biến trên khoảng $(0;2)$","correct":true},{"text":"Hàm số $y=f(x)$ có hai điểm cực trị","correct":false},{"text":"Hàm số $h(x)=f(x)+m$ nghịch biến trên khoảng $(-\\infty;-1)$","correct":true},{"text":"Hàm số $g(x)=f(1-2x)$ đồng biến trên khoảng $(1;+\\infty)$","correct":true}],"shortansAns":"","loigiai":"","mucDo":1},{"id":"2D1V2-3","qtype":"shortans","stem":"[Trích đề thi HKI -Lớp 12-THPT Chuyên Trần Phú-Hải Phòng -Năm học 2024-2025]\r<br>\tCho hàm số $y =-18x^3+9\\left(m^2+1\\right)x^2+6(2-3m)x+2019$ với $m$ là tham số thực. Tìm giá trị của $m$ để hàm số đạt cực tiểu tại $x =\\dfrac{1}{3}$.","choices":[],"shortansAns":"2","loigiai":"","mucDo":1},{"id":"2D1V1-1","qtype":"shortans","stem":"[Trích đề thi HK1-lớp 12-SGD-Tỉnh Vĩnh Long-Năm học-2024-2025]\r<br>\tMột chất điểm chuyển động có phương trình $s(t)$ thì có vận tốc $v(t)=s'(t)$. Biết rằng phương trình chuyển động của chất điểm là $s(t)=\\dfrac{1}{3}t^3-3t^2+5t$ trong đó $t$ được tính bằng giây và $s$ được tính bằng mét. Kể từ giây thứ bao nhiêu trở đi thì vận tốc của chất điểm bắt đầu tăng?","choices":[],"shortansAns":"3","loigiai":"","mucDo":1},{"id":"2D1V2-2","qtype":"shortans","stem":"[Trích đề thi GHK1-Lớp 12 -THPT-HungVuong-TpHCM-Năm học 2024-2025]\r<br>\tCho hàm số $y=f(x)$ xác định và liên tục trên $\\mathbb{R}$. Hàm số $y=f'(x)$ có đồ thị như hình vẽ sau.\r<br>\t\r<br> <div class=\"tikz-rendered\"><img src=\"data:image/png;base64,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\" class=\"tikz-img\" alt=\"TikZ figure\"></div>\r<br>\t\r<br>\tHàm số $y=f(x^2-1)$ có bao nhiêu điểm cực trị?","choices":[],"shortansAns":"5","loigiai":"","mucDo":1},{"id":"2D1C1-5","qtype":"shortans","stem":"[Trích đề thi HKI-lớp 12-THPT CHUYÊN HẠ LONG- QUẢNG NINH-Năm học-2024-2025]\r<br>\t<div class=\"immini-wrap\"><div class=\"immini-text\">Cho điểm $A$ di động trên nửa đường tròn tâm $O$ đường kính $MN=20$ cm, $\\widehat{MOA}=\\alpha$ $0 &lt; \\alpha &lt; \\pi$. Lấy điểm $B$ thuộc nửa đường tròn và $C, D$ thuộc đường kính $MN$ sao cho $ABCD$ là hình chữ nhật. Khi $A$ di động từ trái sang phải, khi đó trong các khoảng $(a;b]$ và $[c;d]$ của $\\alpha$ thì diện tích của hình chữ nhật $ABCD$ tăng. Tính $a+b+c+d$ kết quả làm tròn đến hàng phần trăm.</div><div class=\"immini-fig\"><div class=\"tikz-rendered\"><img src=\"data:image/png;base64,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1+DZDoQbMBrr38aOmpoaNBKDfsGZinAbtFqtj48PtqX2BUZjfaLVal966aWcnBzkMACwAplM9sknn0RGRmIo3yshjsb27Nnz448/vvnmm32832AwxMfHT5o0Cd1a4TZgNAa3LSgoqKGh4aeffur7Itnp06dbW1u7XheLxXfddRfhI8GlsStXrnh6erq4uJSXl/drd/3JkyfFYrGFowMeQhoDq50WdOHChVWrVlVWVpaVlY0cOfKJJ56g+c9oNNbV1VVWVs6YMSMlJWXSpEmET4wCs2LFCkKIk5NTH+/PyckhhGg0GgvHBbwlzB80MJfS0lJCyK5du/r+W7766itCyKpVqzpdr66ulkgkY8aM+f333408Iqy1sR9//NHOzm7YsGGNjY2XL1/u9X6GYbBLDABY5O/vv2LFiueee06v1/fxtxw4cIAQEhgY2Om6m5tbZGTkuXPntmzZQnhEQGnMYDCkpKT87W9/o2UaNTU1vf6WiIgIHx+fZcuWWSVAAIBupKWlEUIWLFjQx/tLSkocHBweeuihri81NjYSQgYPHkx4REBp7KOPPoqJiRk+fDhNY73W/6xbt664uDg/Px87EAGARSKR6NChQ8XFxX05eKGxsVGj0fj5+XVdy29oaNi9e7ejo+PChQsJjwgljdXU1Pzyyy/044ybm1uvozGdTocKezALl3ZsRwHcJpVKaf09wzA933nw4EGj0ThjxoxO18+dO/fkk08ajcYdO3bcc889hEeEMs54/fXX09PT6de9TioaDIbQ0NDAwEBsPIQ7V1dXx3YIwAfLli3LysqKiIgoKirq4baSkhJCyLhx444ePUoIaW1tra6uPnz4cEFBQXBwcH5+/ujRowm/CCKNKZXKhx9+ePz48fSXvY7GNmzYoNFoGhoarBgj8BYmpcEsRCJRfn6+m5ubUqns4RN2SUmJSCS6du3at99+S6+0tLScPn16/PjxkyZNGjVqFOEfI981NjbOnz+/tbXVdOXnn38mhDzwwAPd3k/TW05OjhVjBADok08++YSucnX76oULF+zs7B566KGuL3333XeEkD//+c9tbW1GfuH/9uelS5eWl5c7OTmZrty8efPgwYNisbi5uflWDVh7HrYDALCi52fUzp07n3jiiYSEhHfeeafrq5MnT66oqPjuu+8effRRwiM8n+44ePDgyJEjf/rpp07XHR0d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lErlvn37NmzYMHfuXLYDBD5obm5OS0vbtGnTI488EhoaOmnSJIZhDh48eOTIkc2bN69fv/67776jqzZmdOTIkZUrV1ZWVra0tNx1111RUVEpKSmd7rl+/bpcLv/5558HDBhALM0oPL///jshxNvbu9P15ubmV1991cHBISsri6XQgCdOnTrl6+sbGhp6/vz5Ti/RYiWlUslSaMAf+/fvd3FxmTt3bnV1daeX1Go1HS289dZbRr4TYhr7/PPPCSErV67s9tVFixYNHTq069sCoI8OHz4skUieffbZji2HOpo5c+bo0aPPnTtn9dCAPzZt2iQSiZYuXdra2trtDUuWLKFVGEa+s8YJ97aGDrG7LbAhhCxfvvzq1avvvfee1eMCPqirq3v88ceHDx++fv36W7UcmjNnzoULF7744gurRwc8kZ+f//zzz//pT3/69NNP6b6xrubPnz948GC5XE74TohV5vv377e3tzctgXbywAMP0Mlfq8cFfBAVFVVfX19YWNhDZwpa61RRUWHd0IAnGhoannnmmYEDB2ZnZ98qhxFCJkyYoFAoBg0aRPhOcKOxurq66upqX1/fUaNGdXsD/QT966+/Wj004Ly8vLyDBw8qFIrHHnush9to173ffvvNiqEBf6xevbqpqWnx4sWmIza6NWzYsOjoaCIAghuNdbvVuiP6cLlVkgPoAW3L8pe//KXn22ifB2dnZ2vFBfxx6dIlpVJJCFm8eHHPd97fjgiA4EZjtJ30rRbG6GYI+g6wblzAeX/88YdKpSKEPP744z3feejQIdPUIkC/7N69+/r16+PHj7d09xMOEVwaKykp6WFhjK6dEkIWLlxo3biA86qqqoxG4/Dhw7v2ZOrowoUL+/btI4Q89dRTVowOeOLkyZOmniwgxDT2+++/19TUTJ482dHRsdsbGhoa9u3bJ5FInn76aatHB9xGO+Tdc889Pd+2efPmGzduBAQE+Pj4WCs04A/a/evee+/t+ba6ujo6sSQE9gKcUexhYezNN99saWlJTU0dOXKkdUMDzqPr7fQpcyuNjY1r1661t7f/+OOPrRga8Mfdd99NV8h6vm316tUDBw4kwiCsNNbzjrGysrKNGzcuXryYbhsE6BdPT8+BAweeOXPmypUrt7onLi7u3LlzH3300ZQpU6wbHfAE7RnS826No0ePtra20r1DgmAUEqlU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\" class=\"tikz-img\" alt=\"TikZ figure\"></div></div></div>","choices":[],"shortansAns":"4,71","loigiai":"","mucDo":1},{"id":"2D1V1-3","qtype":"shortans","stem":"[Trích đề thi GHKI -Lớp 12 -THPT-Tam Phú-Năm học 2024-2025]\r<br>\tCho hàm số $y=-x^3+3x^2+(m+2)x-2024$. Tính tổng các giá trị nguyên của tham số $m \\in \\left[-10;5\\right]$ để hàm số nghịch biến trên $\\mathbb{R}$.","choices":[],"shortansAns":"-45","loigiai":"","mucDo":1}];
+var SECTIONS    = [{"type":"choice","count":12,"scorePerQ":0.25,"tf_mults":null},{"type":"choiceTF","count":4,"scorePerQ":1,"tf_mults":[0.1,0.25,0.5,1]},{"type":"shortans","count":5,"scorePerQ":0.5,"tf_mults":null}];
+var STU_LIST    = [{"name":"11A4_Lưu Chí Thức","pw":"HRNUK","lop":"12A4"},{"name":"11A4_Nguyễn Thùy An","pw":"WXASX","lop":"12A4"},{"name":"11A4_Đỗ Mai Anh","pw":"XHTHZ","lop":"12A4"},{"name":"11A4_Đỗ Việt Anh","pw":"SDUVA","lop":"12A4"},{"name":"11A4_Nguyễn Ngọc Anh","pw":"ZP8TK","lop":"12A4"},{"name":"11A4_Trần Thảo Anh","pw":"M2ED5","lop":"12A4"},{"name":"11A4_Trần Thị Hải Anh","pw":"W4JCK","lop":"12A4"},{"name":"11A4_Trần Vân Anh","pw":"3LYL8","lop":"12A4"},{"name":"11A4_Lê Ngọc Ánh","pw":"VJ7GX","lop":"12A4"},{"name":"11A4_Nguyễn Thị Ngọc Ánh","pw":"9HG8T","lop":"12A4"},{"name":"11A4_Triệu Thị Thanh Ba","pw":"CMHTB","lop":"12A4"},{"name":"11A4_Đỗ Nguyễn Hà Châm","pw":"ZCAT4","lop":"12A4"},{"name":"11A4_Vũ Lâm Châu","pw":"C2D7H","lop":"12A4"},{"name":"11A4_Nguyễn Ngọc Chương","pw":"V2HCU","lop":"12A4"},{"name":"11A4_Khổng Minh Cương","pw":"LQHZH","lop":"12A4"},{"name":"11A4_Nguyễn Quốc Cường","pw":"KGTQX","lop":"12A4"},{"name":"11A4_Khổng Chí Dũng","pw":"HUERK","lop":"12A4"},{"name":"11A4_Khổng Tuấn Dũng","pw":"CZFS7","lop":"12A4"},{"name":"11A4_Nguyễn Đức Duy","pw":"5LZKL","lop":"12A4"},{"name":"11A4_Trần Thị Thùy Dương","pw":"URP8J","lop":"12A4"},{"name":"11A4_Trần Quang Đạo","pw":"8TLNN","lop":"12A4"},{"name":"11A4_Khổng Tiến Đạt","pw":"UPWW6","lop":"12A4"},{"name":"11A4_Trần Quang Đạt","pw":"8Q9CN","lop":"12A4"},{"name":"11A4_Nguyễn Thị Định","pw":"DW78T","lop":"12A4"},{"name":"11A4_Nguyễn Thiện Đức","pw":"9XPKY","lop":"12A4"},{"name":"11A4_Dương Minh Hải","pw":"ZF8TG","lop":"12A4"},{"name":"11A4_Đỗ Chí Hải","pw":"7AN9N","lop":"12A4"},{"name":"11A4_Trần Thị Thu Hằng","pw":"UTFAZ","lop":"12A4"},{"name":"11A4_Vũ Minh Hằng","pw":"DMQ54","lop":"12A4"},{"name":"11A4_Nguyễn Thị Kim Huệ","pw":"PUU44","lop":"12A4"},{"name":"11A4_Nguyễn Đức Huy","pw":"ZG7J3","lop":"12A4"},{"name":"11A4_Trần Quang Huy","pw":"2ASWK","lop":"12A4"},{"name":"11A4_Vũ Thị Thu Huyền","pw":"E9V26","lop":"12A4"},{"name":"11A4_Nguyễn Thế Hưng","pw":"WWPU6","lop":"12A4"},{"name":"11A4_Đỗ Thị Mỹ Hương","pw":"BSMFX","lop":"12A4"},{"name":"11A4_Nguyễn Anh Kiệt","pw":"7725Q","lop":"12A4"},{"name":"11A4_Hoàng Bảo Tuệ Lâm","pw":"VHX4L","lop":"12A4"},{"name":"11A4_Đỗ Thị Mỹ Lệ","pw":"CLW4U","lop":"12A4"},{"name":"11A4_Dương Hà Linh","pw":"E8V8F","lop":"12A4"},{"name":"11A4_Lương Thị Ngọc Linh","pw":"8MMZG","lop":"12A4"},{"name":"11A4_Nguyễn Thị Linh","pw":"FHNRQ","lop":"12A4"},{"name":"11A4_Nguyễn Thị Phương Ngân","pw":"N7G97","lop":"12A4"},{"name":"11A5_Đỗ Mai Linh","pw":"P2B3W","lop":"12A5"},{"name":"11A5_Phan Diệu Linh","pw":"UCEC3","lop":"12A5"},{"name":"11A5_Phan Thùy Linh","pw":"MXMCE","lop":"12A5"},{"name":"11A5_Đỗ Đức Long","pw":"PMHWE","lop":"12A5"},{"name":"11A5_Trần Hiền Lương","pw":"5EZ7U","lop":"12A5"},{"name":"11A5_Đào Trần Khánh Ly","pw":"KXCKE","lop":"12A5"},{"name":"11A5_Vũ Thị Khánh Ly","pw":"92E7F","lop":"12A5"},{"name":"11A5_Dương Đức Mạnh","pw":"C4DYC","lop":"12A5"},{"name":"11A5_Trần Đức Mạnh","pw":"9AGGU","lop":"12A5"},{"name":"11A5_Lê Thị Quý Mến","pw":"W89PR","lop":"12A5"},{"name":"11A5_Nguyễn Quang Minh","pw":"65QQR","lop":"12A5"},{"name":"11A5_Trần Việt Nam","pw":"QQ8PT","lop":"12A5"},{"name":"11A5_Hà Bảo Ngân","pw":"CX3Y9","lop":"12A5"},{"name":"11A5_Nguyễn Bích Ngọc","pw":"B2FGW","lop":"12A5"},{"name":"11A5_Nguyễn Hồng Nhung","pw":"W4BU9","lop":"12A5"},{"name":"11A5_Trần Hữu Ninh","pw":"B46PH","lop":"12A5"},{"name":"11A5_Nguyễn Văn Phúc","pw":"KYEEE","lop":"12A5"},{"name":"11A5_Nguyễn Minh Phương","pw":"RKE3V","lop":"12A5"},{"name":"11A5_Trần Như Quỳnh","pw":"M473N","lop":"12A5"},{"name":"11A5_Khổng Ánh Sáng","pw":"AK6EC","lop":"12A5"},{"name":"11A5_Hoàng Thị Phương Thảo","pw":"PSSET","lop":"12A5"},{"name":"11A5_Nguyễn Duy Thiều","pw":"Q2RPB","lop":"12A5"},{"name":"11A5_Nguyễn Thị Thu","pw":"UZM6H","lop":"12A5"},{"name":"11A5_Khương Thị Anh Thư","pw":"XFLNZ","lop":"12A5"},{"name":"11A5_Nguyễn Thị Ngọc Thương","pw":"ELHY5","lop":"12A5"},{"name":"11A5_Khổng Thị Thu Trang","pw":"HBQ6T","lop":"12A5"},{"name":"11A5_Nguyễn Thị Quỳnh Trang","pw":"888TY","lop":"12A5"},{"name":"11A5_Đặng Minh Triết","pw":"8FWDG","lop":"12A5"},{"name":"11A5_Trần Anh Tuấn","pw":"PHAWG","lop":"12A5"},{"name":"11A5_Hoàng Ánh Tuyết","pw":"HRHGM","lop":"12A5"},{"name":"11A5_Phan Ánh Tuyết","pw":"PLFE8","lop":"12A5"},{"name":"11A5_Khổng Mạnh Tú","pw":"5HQ6D","lop":"12A5"},{"name":"11A5_Khổng Ngọc Tú","pw":"K47BC","lop":"12A5"},{"name":"11A5_Nguyễn Anh Tú","pw":"A6SXS","lop":"12A5"},{"name":"11A5_Nguyễn Văn Việt","pw":"GA8LG","lop":"12A5"},{"name":"11A5_Đào Tường Vy","pw":"2E8RZ","lop":"12A5"},{"name":"11A5_Nguyễn Bảo Yến","pw":"KB775","lop":"12A5"},{"name":"11A5_Nguyễn Thị Yến","pw":"344MC","lop":"12A5"},{"name":"11A6_Trần Thúy An","pw":"LG2RY","lop":"12A6"},{"name":"11A6_Nguyễn Thi Lan Anh_1","pw":"45P2C","lop":"12A6"},{"name":"11A6_Nguyễn Thị Lan Anh_2","pw":"TGW68","lop":"12A6"},{"name":"11A6_Nguyễn Thị Lan Anh_3","pw":"CJJUQ","lop":"12A6"},{"name":"11A6_Khương Ngọc Ánh","pw":"9P8KX","lop":"12A6"},{"name":"11A6_Nguyễn Ngọc Ánh","pw":"JW62Q","lop":"12A6"},{"name":"11A6_Trần Linh Chi","pw":"SWBJM","lop":"12A6"},{"name":"11A6_Vũ Quang Chung","pw":"KKEHU","lop":"12A6"},{"name":"11A6_Nguyễn Thanh Doan","pw":"R72BX","lop":"12A6"},{"name":"11A6_Dương Văn Duy","pw":"FGKQU","lop":"12A6"},{"name":"11A6_Phạm Khánh Duy","pw":"CW4HN","lop":"12A6"},{"name":"11A6_Ngô Tiến Dũng","pw":"VFBBR","lop":"12A6"},{"name":"11A6_Nguyễn Thị Ánh Dương","pw":"BFADQ","lop":"12A6"},{"name":"11A6_Nguyễn Tùng Dương","pw":"C9ZND","lop":"12A6"},{"name":"11A6_Ngô Ngọc Đại","pw":"N5E6T","lop":"12A6"},{"name":"11A6_Nguyễn Công Đoàn","pw":"DMA8K","lop":"12A6"},{"name":"11A6_Phan Thị Hương Giang","pw":"X8SVX","lop":"12A6"},{"name":"11A6_Trần Thị Thu Hằng","pw":"72P2M","lop":"12A6"},{"name":"11A6_Khổng Minh Hiếu","pw":"CD7AA","lop":"12A6"},{"name":"11A6_Lưu Trung Hiếu","pw":"ZK5HV","lop":"12A6"},{"name":"11A6_Hứa Thị Hoa","pw":"M3Q74","lop":"12A6"},{"name":"11A6_Trần Huy Hoàng","pw":"HFLPQ","lop":"12A6"},{"name":"11A6_Nguyễn Văn Học","pw":"A2BYX","lop":"12A6"},{"name":"11A6_Nguyễn Thúy Hồng","pw":"HZL5X","lop":"12A6"},{"name":"11A6_Lăng Thanh Huệ","pw":"BTUAG","lop":"12A6"},{"name":"11A6_Nguyễn Hà Tuấn Hùng","pw":"MA83W","lop":"12A6"},{"name":"11A6_Lương Thế Hưng","pw":"U2SWD","lop":"12A6"},{"name":"11A6_Nguyễn Thành Hưng","pw":"GRC2H","lop":"12A6"},{"name":"11A6_Khổng Lan Hương","pw":"HAJXA","lop":"12A6"},{"name":"11A6_Nguyễn Thị Mai Hương","pw":"4C4ZJ","lop":"12A6"},{"name":"11A6_Phan Thị Thu Hương","pw":"P9QPV","lop":"12A6"},{"name":"11A6_Phạm Anh Khoa","pw":"WCDCR","lop":"12A6"},{"name":"11A6_Bùi Minh Khuyến","pw":"ECSPX","lop":"12A6"},{"name":"11A6_Vũ Hoàng Lân","pw":"45GF2","lop":"12A6"},{"name":"11A6_Hà Thị Thu Lê","pw":"XC2BC","lop":"12A6"},{"name":"11A6_Trần Thị Yến Linh","pw":"4LS98","lop":"12A6"},{"name":"11A6_Vương Thị Thùy Linh","pw":"QQGTZ","lop":"12A6"},{"name":"11A6_Hoàng Quốc Việt","pw":"NTSZU","lop":"12A6"}];  // [{name, pw, lop}]
+var ALLOW_GUEST = true;
+var GUEST_LABEL = "Khách";
+var MIN_TIME_PCT = 0;
+var TRUONG_LIST = ['THPT Văn Quán','THPT Ngô Gia Tự','THPT Trần Nguyên Hãn','THPT Sông Lô','THPT Sáng Sơn','THPT Bình Sơn','THPT Liễn Sơn','THPT Tam Dương','Khác','THCS Đồng Ích','THCS Tiên Lữ','THCS Xuân Lôi','THCS Văn Quán','THCS Bàn Giản','THCS Xuân Hòa','THCS Đồng Thịnh','THCS Lập Thạch','THCS Yên Thạch'];
+var TRUONG_DEFAULT = 'THPT Văn Quán';
+
+// ── State ──────────────────────────────────────────────────────────────────
+var qs=[], ans=[], cur=0, startEpoch=0, timerInterval=null, submitted=false, stuName='', stuGroup='', stuLop='', stuTruong='';
+var keys='ABCDEFGH';
+
+// ── Chuẩn hóa đáp án shortans để so sánh ──────────────────────────────────
+function normSAForCompare(s) {
+  if (!s) return '';
+  var r = s.trim();
+  // Bỏ wrapper $...$ hoặc (...)
+  r = r.replace(/^$([sS]*?)$$/, '$1')
+        .replace(/^\(([sS]*)\)$/, '$1')
+        .trim();
+  // {,} → , (dấu phẩy thập phân LaTeX)
+  r = r.replace(/{,}/g, ',');
+  // Bỏ lệnh LaTeX còn sót
+  r = r.replace(/\[a-zA-Z]+{([^{}]*)}/g, '$1')
+        .replace(/\[a-zA-Z]+/g, '')
+        .replace(/[{}]/g, '')
+        .trim();
+  // Chuẩn hóa: lowercase, , → . (để so sánh số)
+  return r.toLowerCase().replace(/,/g, '.');
+}
+
+// ── Shuffle util ───────────────────────────────────────────────────────────
+function shuffle(arr){for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function(){
+  initLoginMode();
+  checkPhase();
+  setInterval(checkPhase, 10000); // re-check every 10s
+});
+
+function checkPhase(){
+  var now = Date.now();
+  if(CLOSE_AT && now > CLOSE_AT && !submitted){
+    if(document.getElementById('scr-exam').style.display !== 'none'){
+      // Đang làm → tự nộp
+      autoSubmitTimeout();
+    } else {
+      showScr('closed');
+    }
+    return;
+  }
+  if(OPEN_AT && now < OPEN_AT){
+    showScr('waiting');
+    tickCountdown();
+    return;
+  }
+  // Đã qua giờ mở hoặc không hẹn giờ
+  var current = getCurrentScr();
+  if(current === 'waiting' || current === ''){
+    showScr('login');
+  }
+}
+
+function getCurrentScr(){
+  for(var id of ['waiting','closed','login','exam','result']){
+    if(document.getElementById('scr-'+id).style.display !== 'none') return id;
+  }
+  return '';
+}
+function showScr(name){
+  ['waiting','closed','login','exam','result'].forEach(function(s){
+    document.getElementById('scr-'+s).style.display = s===name ? '' : 'none';
+  });
+}
+
+// ── Countdown ─────────────────────────────────────────────────────────────
+function tickCountdown(){
+  var diff = OPEN_AT - Date.now();
+  if(diff <= 0){ checkPhase(); return; }
+  var h=Math.floor(diff/3600000), m=Math.floor((diff%3600000)/60000), s=Math.floor((diff%60000)/1000);
+  var txt = (h?h+'g ':'')+pad(m)+'p'+pad(s)+'s';
+  document.getElementById('countdown-time').textContent = txt;
+  var d = new Date(OPEN_AT);
+  document.getElementById('countdown-date').textContent =
+    'lúc '+pad(d.getHours())+':'+pad(d.getMinutes())+' · '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+  setTimeout(tickCountdown, 1000);
+}
+
+// ── Login ──────────────────────────────────────────────────────────────────
+function onStuSelectChange(){
+  var sel = document.getElementById('stu-select');
+  var name = sel.value;
+  var err = document.getElementById('login-err');
+  var doneMsg = document.getElementById('already-done-msg');
+  err.style.display = 'none';
+  if(name && hasDoneExam(name)){
+    doneMsg.style.display = '';
+  } else {
+    doneMsg.style.display = 'none';
+  }
+}
+
+function hasDoneExam(name){
+  try{ return !!localStorage.getItem('done_'+EXAM_CODE+'_'+name); }catch(e){ return false; }
+}
+function markDoneExam(name){
+  try{ localStorage.setItem('done_'+EXAM_CODE+'_'+name, '1'); }catch(e){}
+}
+
+function initLoginMode(){
+  var hasList  = STU_LIST && STU_LIST.length > 0;
+  var hasGuest = ALLOW_GUEST;
+  // Set guest label text
+  var gl = GUEST_LABEL || 'Khách';
+  var tabGuestLbl = document.getElementById('tab-guest-label');
+  if(tabGuestLbl) tabGuestLbl.textContent = gl;
+  var freeLbl = document.getElementById('free-mode-label');
+  if(freeLbl) freeLbl.textContent = gl.toLowerCase();
+
+  // Populate Truong dropdowns
+  _populateTruongSelect('stu-truong-class', TRUONG_DEFAULT);
+  _populateTruongSelect('stu-truong-free',  TRUONG_DEFAULT);
+
+  // Monitor changes on free Truong select for "Khác" option
+  var selTruongFree = document.getElementById('stu-truong-free');
+  if(selTruongFree) selTruongFree.addEventListener('change', function(){
+    var wrap = document.getElementById('stu-truong-other-wrap');
+    if(wrap) wrap.style.display = this.value === 'Khác' ? '' : 'none';
+  });
+
+  if(hasList && hasGuest){
+    document.getElementById('login-tabs').style.display = '';
+    switchLoginTab('class');
+    _populateLopSelect();
+  } else if(hasList){
+    document.getElementById('login-list-mode').style.display = '';
+    document.getElementById('login-free-mode').style.display = 'none';
+    _populateLopSelect();
+  } else {
+    document.getElementById('login-list-mode').style.display = 'none';
+    document.getElementById('login-free-mode').style.display = '';
+  }
+}
+
+function _populateTruongSelect(selId, defaultVal) {
+  var sel = document.getElementById(selId);
+  if(!sel) return;
+  sel.innerHTML = '';
+  TRUONG_LIST.forEach(function(t){
+    var opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    if(t === defaultVal) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function _populateLopSelect() {
+  // Collect unique lop names from STU_LIST
+  var lopSet = [];
+  STU_LIST.forEach(function(s){ if(s.lop && lopSet.indexOf(s.lop)===-1) lopSet.push(s.lop); });
+  var selLop = document.getElementById('stu-lop-select');
+  if(!selLop) return;
+  selLop.innerHTML = '<option value="">-- Chọn lớp --</option>';
+  lopSet.forEach(function(lop){
+    var opt = document.createElement('option');
+    opt.value = lop; opt.textContent = lop;
+    selLop.appendChild(opt);
+  });
+  // If only one lop, auto-select it
+  if(lopSet.length === 1){ selLop.value = lopSet[0]; onStuLopChange(); }
+}
+
+function onStuLopChange(){
+  var selLop = document.getElementById('stu-lop-select');
+  var lop = selLop ? selLop.value : '';
+  var selStu = document.getElementById('stu-select');
+  if(!selStu) return;
+  selStu.innerHTML = '<option value="">-- Chọn tên của bạn --</option>';
+  STU_LIST.filter(function(s){ return !lop || s.lop === lop; }).forEach(function(s){
+    var opt = document.createElement('option');
+    opt.value = s.name; opt.textContent = s.name;
+    selStu.appendChild(opt);
+  });
+  document.getElementById('login-err').style.display = 'none';
+  document.getElementById('already-done-msg').style.display = 'none';
+}
+
+function onStuTruongChange(){ /* placeholder for class tab — truong from dropdown */ }
+
+function switchLoginTab(tab){
+  var btnClass = document.getElementById('tab-btn-class');
+  var btnGuest = document.getElementById('tab-btn-guest');
+  var listMode = document.getElementById('login-list-mode');
+  var freeMode = document.getElementById('login-free-mode');
+  if(tab === 'class'){
+    btnClass.style.background = '#2563eb'; btnClass.style.color = '#fff';
+    btnGuest.style.background = 'transparent'; btnGuest.style.color = '#64748b';
+    listMode.style.display = ''; freeMode.style.display = 'none';
+  } else {
+    btnGuest.style.background = '#2563eb'; btnGuest.style.color = '#fff';
+    btnClass.style.background = 'transparent'; btnClass.style.color = '#64748b';
+    listMode.style.display = 'none'; freeMode.style.display = '';
+  }
+  document.getElementById('login-err').style.display = 'none';
+}
+
+function startExam(){
+  var err = document.getElementById('login-err');
+  var doneMsg = document.getElementById('already-done-msg');
+  err.style.display = 'none'; doneMsg.style.display = 'none';
+  var name = '';
+  // Xác định đang ở tab nào
+  var listMode = document.getElementById('login-list-mode');
+  var isListTab = listMode && listMode.style.display !== 'none';
+
+  if(isListTab && STU_LIST && STU_LIST.length > 0){
+    // === Tab Lớp: chọn tên + mật khẩu ===
+    // Validate chọn Lớp trước
+    var selLopEl = document.getElementById('stu-lop-select');
+    if(selLopEl && !selLopEl.value){
+      err.textContent='⚠ Vui lòng chọn lớp của bạn'; err.style.display=''; selLopEl.focus(); return;
+    }
+    var sel = document.getElementById('stu-select');
+    name = (sel.value||'').trim();
+    if(!name){
+      err.textContent='⚠ Vui lòng chọn tên của bạn'; err.style.display=''; sel.focus(); return;
+    }
+    if(hasDoneExam(name)){
+      doneMsg.style.display = ''; return;
+    }
+    var pwInp = document.getElementById('stu-pw');
+    var pw = (pwInp.value||'').trim();
+    var stuObj = STU_LIST.find(function(s){return s.name===name;});
+    if(!pw){ err.textContent='⚠ Vui lòng nhập mật khẩu'; err.style.display=''; pwInp.focus(); return; }
+    if(!stuObj || pw.toUpperCase() !== stuObj.pw.toUpperCase()){
+      err.textContent='❌ Mật khẩu không đúng. Hỏi giáo viên nếu quên.'; err.style.display=''; pwInp.focus(); return;
+    }
+    stuGroup = 'class';
+    stuLop   = stuObj.lop || (document.getElementById('stu-lop-select')||{value:''}).value || '';
+    stuTruong = (document.getElementById('stu-truong-class')||{value:'THPT Văn Quán'}).value || 'THPT Văn Quán';
+  } else {
+    // === Tab Khách / Khác ===
+    var freeInp = document.getElementById('stu-name-free');
+    name = (freeInp.value||'').trim();
+    if(!name || name.length < 2){
+      err.textContent='⚠ Vui lòng nhập họ và tên đầy đủ (ít nhất 2 ký tự)'; err.style.display=''; freeInp.focus(); return;
+    }
+    // Validate Lớp
+    var lopFreeInp = document.getElementById('stu-lop-free');
+    var lopFreeVal = (lopFreeInp ? lopFreeInp.value : '').trim();
+    if(!lopFreeVal){
+      err.textContent='⚠ Vui lòng nhập lớp đang học (ví dụ: 11A1)'; err.style.display=''; if(lopFreeInp) lopFreeInp.focus(); return;
+    }
+    // Validate Trường
+    var selTruongFree = document.getElementById('stu-truong-free');
+    var truongVal = selTruongFree ? selTruongFree.value : '';
+    if(!truongVal){
+      err.textContent='⚠ Vui lòng chọn trường đang học'; err.style.display=''; if(selTruongFree) selTruongFree.focus(); return;
+    }
+    if(truongVal === 'Khác'){
+      var otherInp = document.getElementById('stu-truong-other');
+      truongVal = (otherInp ? otherInp.value : '').trim();
+      if(!truongVal){
+        err.textContent='⚠ Vui lòng nhập tên trường của bạn'; err.style.display=''; if(otherInp) otherInp.focus(); return;
+      }
+    }
+    if(hasDoneExam(name)){
+      doneMsg.style.display = ''; return;
+    }
+    stuGroup  = GUEST_LABEL || 'Khách';
+    stuLop    = lopFreeVal;
+    stuTruong = truongVal;
+  }
+  stuName = name;
+  qs = ALL_QS.slice();
+  if(SHUFFLE_C) qs.forEach(function(q){
+    if(q.choices && q.choices.length > 1){
+      var withIdx = q.choices.map(function(c,i){return {c,orig:i};});
+      shuffle(withIdx);
+      q._choiceOrder = withIdx.map(function(x){return x.orig;});
+      q.choices = withIdx.map(function(x){return x.c;});
+    }
+  });
+  ans = qs.map(function(q){ return q.qtype==='choiceTF'? new Array(q.choices.length).fill(null): null; });
+  cur = 0;
+  startEpoch = Date.now();
+  showScr('exam');
+  buildDots();
+  renderQ(cur);
+  startTimer();
+  // Autosave mỗi 30s
+  setInterval(autosaveDraft, 30000);
+}
+
+// ── Dots ───────────────────────────────────────────────────────────────────
+function buildDots(){
+  var wrap = document.getElementById('dot-wrap');
+  wrap.innerHTML = qs.map(function(q,i){
+    return '<button class="dot" id="dot-'+i+'" onclick="goTo('+i+')">'+(i+1)+'</button>';
+  }).join('');
+  updateDots();
+}
+function updateDots(){
+  qs.forEach(function(q,i){
+    var d = document.getElementById('dot-'+i);
+    if(!d) return;
+    d.className = 'dot' + (isAnswered(i)?' answered':'') + (i===cur?' current':'');
+    if(i===cur && isAnswered(i)) d.className = 'dot answered current';
+  });
+  document.getElementById('q-pos').textContent = 'Câu '+(cur+1)+' / '+qs.length;
+}
+function isAnswered(i){
+  var a=ans[i], q=qs[i];
+  if(q.qtype==='choiceTF') return Array.isArray(a) && a.some(function(v){return v!==null;});
+  return a !== null && a !== undefined && a !== '';
+}
+
+// ── Render question ────────────────────────────────────────────────────────
+function renderQ(idx){
+  cur = idx;
+  var q=qs[idx], area=document.getElementById('q-area');
+  var typeLabel = q.qtype==='choice'?'Trắc nghiệm':q.qtype==='choiceTF'?'Đúng/Sai':'Trả lời ngắn';
+  var diffLabel = ['','Nhận biết','Thông hiểu','Vận dụng','Vận dụng cao'][q.mucDo||1]||'';
+  var html = '<div class="q-wrap mj">';
+  html += '<div class="q-num">Câu '+(idx+1)+' · <span style="color:#7c3aed">'+typeLabel+'</span>'+(diffLabel?' · '+diffLabel:'')+'</div>';
+  html += '<div class="q-stem">'+q.stem+'</div>';
+  if(q.qtype==='choice'){
+    html += '<div class="choice-list">';
+    (q.choices||[]).forEach(function(c,ci){
+      var sel = ans[idx]===ci;
+      html += '<button class="choice'+(sel?' selected':'')+'" onclick="selectChoice('+ci+')">'
+            + '<span class="choice-key">'+keys[ci]+'.</span><span>'+c.text+'</span></button>';
+    });
+    html += '</div>';
+  } else if(q.qtype==='choiceTF'){
+    html += '<div class="tf-grid">';
+    (q.choices||[]).forEach(function(c,ci){
+      var a = Array.isArray(ans[idx]) ? ans[idx][ci] : null;
+      html += '<div class="tf-item mj"><div class="tf-stem">'+keys[ci]+'. '+c.text+'</div>'
+            + '<div class="tf-btn-row">'
+            + '<button class="tf-btn'+(a===true?' sel-T':'')+'" onclick="selectTF('+ci+',true)">Đúng</button>'
+            + '<button class="tf-btn'+(a===false?' sel-F':'')+'" onclick="selectTF('+ci+',false)">Sai</button>'
+            + '</div></div>';
+    });
+    html += '</div>';
+  } else {
+    html += '<input class="sa-input mj" type="text" placeholder="Nhập đáp án..." value="'
+          + ((ans[idx]||'')+'').replace(/"/g,'&quot;')
+          + '" oninput="ans[cur]=this.value" onchange="updateDots()">';
+  }
+  html += '</div>';
+  area.innerHTML = html;
+  // Navigation buttons
+  // Ẩn nút Trước nếu chế độ no_prev hoặc must_answer
+  var showPrev = (idx > 0) && (NAV_MODE === 'free');
+  document.getElementById('btn-prev').style.visibility = showPrev ? 'visible' : 'hidden';
+  document.getElementById('btn-next').style.visibility = idx<qs.length-1 ? 'visible':'hidden';
+  updateDots();
+  // MathJax
+  if(window.MathJax && MathJax.typesetPromise){
+    try{ MathJax.typesetPromise([area]).catch(function(){}); }catch(e){}
+  }
+}
+
+function selectChoice(ci){
+  ans[cur]=ci; updateDots();
+  document.querySelectorAll('.choice').forEach(function(el,i){ el.classList.toggle('selected', i===ci); });
+  autosaveDraft();
+}
+function selectTF(ci,val){
+  if(!Array.isArray(ans[cur])) ans[cur]=new Array(qs[cur].choices.length).fill(null);
+  ans[cur][ci]=val; updateDots();
+  renderQ(cur); // re-render to show selected state
+  autosaveDraft();
+}
+function navigate(dir){
+  // Chế độ điều hướng chống gian lận
+  if(dir === -1){
+    if(NAV_MODE === 'no_prev'){
+      // Không cho xem lại câu trước
+      return;
+    }
+    if(NAV_MODE === 'must_answer'){
+      // Phải trả lời câu hiện tại mới được đi tiếp (về trước cũng không nếu chưa trả lời)
+      if(!isAnswered(cur)){ alert('Vui lòng trả lời câu này trước khi chuyển.'); return; }
+    }
+  }
+  if(dir === 1 && NAV_MODE === 'must_answer'){
+    if(!isAnswered(cur)){ alert('Vui lòng trả lời câu này trước khi chuyển.'); return; }
+  }
+  goTo(cur+dir);
+}
+function goTo(idx){
+  if(idx<0||idx>=qs.length) return;
+  if(idx<cur){
+    if(NAV_MODE==='no_prev') return;
+    if(NAV_MODE==='must_answer'&&!isAnswered(cur)){ alert('Vui lòng trả lời câu này trước khi chuyển.'); return; }
+  }
+  cur=idx; renderQ(idx);
+}
+
+// ── Timer ──────────────────────────────────────────────────────────────────
+function startTimer(){
+  var totalSec = EXAM_DUR*60;
+  timerInterval = setInterval(function(){
+    var elapsed = (Date.now()-startEpoch)/1000;
+    var remain  = Math.max(0, totalSec-elapsed);
+    var m=Math.floor(remain/60), s=Math.floor(remain%60);
+    document.getElementById('timer-txt').textContent = pad(m)+':'+pad(s);
+    var pct = remain/totalSec*100;
+    var fill = document.getElementById('timer-fill');
+    fill.style.width = pct+'%';
+    fill.className   = 'timer-fill'+(pct<20?' danger':pct<40?' warn':'');
+    if(remain<=0){ clearInterval(timerInterval); autoSubmitTimeout(); }
+  }, 1000);
+}
+
+// ── Submit ─────────────────────────────────────────────────────────────────
+function confirmSubmit(){
+  if(MIN_TIME_PCT > 0){
+    var elapsed = (Date.now() - startEpoch) / 1000;
+    var minSec  = EXAM_DUR * 60 * MIN_TIME_PCT / 100;
+    if(elapsed < minSec){
+      var remaining = Math.ceil(minSec - elapsed);
+      var rm = Math.floor(remaining/60), rs = remaining%60;
+      alert('⏳ Cần làm thêm ' + (rm>0?rm+'p ':'')+rs+'s nữa mới được nộp bài (tối thiểu '+MIN_TIME_PCT+'% thời gian).');
+      return;
+    }
+  }
+  var done  = qs.filter(function(_,i){return isAnswered(i);}).length;
+  var total = qs.length;
+  if(done < total){
+    if(!confirm('Còn '+(total-done)+' câu chưa trả lời. Nộp bài?')) return;
+  }
+  doSubmit(false, 0);
+}
+function autoSubmitTimeout(){
+  clearInterval(timerInterval);
+  doSubmit(true, Math.round((Date.now()-startEpoch)/1000 - EXAM_DUR*60));
+}
+function autosaveDraft(){
+  try{ localStorage.setItem('draft_'+EXAM_CODE+'_'+stuName, JSON.stringify({ans,ts:Date.now()})); }catch(e){}
+}
+
+function doSubmit(late, overSec){
+  if(submitted) return; submitted=true;
+  clearInterval(timerInterval);
+  markDoneExam(stuName);
+  var elapsed = Math.round((Date.now()-startEpoch)/1000);
+  var em=Math.floor(elapsed/60), es=elapsed%60;
+  var result = scoreLocally(ans);
+  result.name = stuName; result.late=late; result.over_sec=overSec||0;
+  result.elapsed = pad(em)+'p'+pad(es)+'s';
+  result.submitted_at = (function(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes());})();
+  result.group = stuGroup || '';
+  result.lop   = stuLop   || '';
+  result.truong = stuTruong || '';
+  showResult(result);
+  pushToGsheet(result);
+}
+
+// ── Local scoring ──────────────────────────────────────────────────────────
+function scoreLocally(finalAns){
+  var total=qs.length, nOk=0, pts=0, details=[];
+  var nTN=0, nDSArr=[], nSA=0;
+  function spq(qi){ var s=SECTIONS; if(!s.length)return 1; var off=0; for(var si=0;si<s.length;si++){if(qi>=off&&qi<off+s[si].count)return s[si].scorePerQ||1;off+=s[si].count;}return 1;}
+  function mults(qi){ var s=SECTIONS; if(!s.length)return null; var off=0; for(var si=0;si<s.length;si++){if(qi>=off&&qi<off+s[si].count&&s[si].tf_mults)return s[si].tf_mults;off+=s[si].count;}return null;}
+  qs.forEach(function(q,qi){
+    var a=finalAns[qi], p=spq(qi), ok=false, qpts=0;
+    if(q.qtype==='choice'){
+      var cor=(q.choices||[]).findIndex(function(c){return c.correct;});
+      ok=(a===cor&&a!==null); qpts=ok?p:0;
+      if(ok) nTN++;
+    }else if(q.qtype==='choiceTF'){
+      var m=mults(qi), ch=q.choices||[], nok=0;
+      if(Array.isArray(a)) ch.forEach(function(c,i){if(Boolean(a[i])===Boolean(c.correct))nok++;});
+      var _mult;
+      if(m&&Array.isArray(m)&&m.length>=4){
+        _mult=nok===0?0:(nok<=m.length?Number(m[nok-1]):1);
+      }else{
+        _mult=ch.length===4?({0:0,1:0.1,2:0.25,3:0.5,4:1.0}[nok]||0):(nok/Math.max(ch.length,1));
+      }
+      qpts=Math.round(_mult*p*1000)/1000; ok=(nok===ch.length);
+      nDSArr.push(nok+'/'+ch.length+'='+qpts+'đ');
+    }else{
+      var exp=normSAForCompare(q.shortansAns);
+      var giv=(String(a||'')).trim().toLowerCase().replace(/,/g,'.');
+      ok=(exp&&exp===giv); qpts=ok?p:0;
+      if(ok) nSA++;
+    }
+    pts+=qpts; if(ok)nOk++;
+    details.push({ok,pts:qpts,correct:q.qtype==='choice'?(q.choices||[]).findIndex(function(c){return c.correct;}):-1,ans:a,loigiai:q.loigiai||''});
+  });
+  var maxPts=SECTIONS.length?SECTIONS.reduce(function(s,sec){return s+sec.count*(sec.scorePerQ||1);},0):total;
+  return {score:Math.round(Math.min(pts,maxPts)*100)/100, correct:nOk, total:total, details:details, nTN:nTN, nDS:nDSArr.join(' '), nSA:nSA};
+}
+
+// ── Show result ────────────────────────────────────────────────────────────
+function showResult(r){
+  showScr('result');
+  var sc=r.score, emoji=sc>=9?'🏆':sc>=7?'⭐':sc>=5?'😊':'💪';
+  var col=sc>=8?'#16a34a':sc>=5?'#d97706':'#dc2626';
+  document.getElementById('result-emoji').textContent=emoji;
+  document.getElementById('result-score').textContent=sc+'đ';
+  document.getElementById('result-score').style.color=col;
+  document.getElementById('result-label').textContent=r.correct+'/'+r.total+' câu đúng';
+  document.getElementById('result-meta').textContent='Nộp: '+r.submitted_at+(r.late?' · ⚠ Muộn':'')+(r.elapsed?' · Làm: '+r.elapsed:'');
+  if(SHOW_RES>=2){
+    var html='';
+    if(SHOW_RES>=3) qs.forEach(function(q,i){
+      var d=r.details[i]||{};
+      var statusCls=d.ok?'badge-ok':(q.qtype==='choiceTF'&&d.pts>0)?'badge-partial':'badge-fail';
+      var statusTxt=d.ok?'Đúng':(q.qtype==='choiceTF'&&d.pts>0)?'+'+d.pts+'đ':'Sai';
+      html+='<div class="card q-wrap mj" style="margin-bottom:10px">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+      html+='<span style="font-size:12px;color:#64748b">Câu '+(i+1)+'</span>';
+      html+='<span class="badge '+statusCls+'">'+statusTxt+'</span></div>';
+      html+='<div class="q-stem" style="font-size:13px">'+q.stem+'</div>';
+      if(q.qtype==='choice'&&SHOW_RES>=4){
+        (q.choices||[]).forEach(function(c,ci){
+          var isAns=d.ans===ci, isCor=c.correct;
+          var style=isCor?'correct':isAns&&!isCor?'wrong':'';
+          html+='<div class="choice '+style+'" style="margin-top:4px;pointer-events:none">'
+               +'<span class="choice-key">'+keys[ci]+'.</span><span>'+c.text+'</span></div>';
+        });
+      }
+      if(d.loigiai&&SHOW_RES>=4) html+='<div class="loigiai-wrap mj"><b>Lời giải:</b> '+d.loigiai+'</div>';
+      html+='</div>';
+    });
+    document.getElementById('result-detail').innerHTML=html;
+    if(window.MathJax&&MathJax.typesetPromise) try{MathJax.typesetPromise([document.getElementById('result-detail')]).catch(function(){});}catch(e){}
+  }
+}
+
+// ── Push to Google Sheet ───────────────────────────────────────────────────
+function pushToGsheet(result){
+  var statusEl = document.getElementById('result-submit-status');
+  var grpSuffix = (result.group && result.group !== 'class') ? ('|' + result.group) : '';
+  var payload = {
+    examCode: EXAM_CODE + grpSuffix, name: result.name, score: result.score,
+    correct: result.correct, total: result.total,
+    correct_tn: result.nTN||0, correct_ds: result.nDS||'', correct_sa: result.nSA||0,
+    submitted_at: result.submitted_at, late: result.late, elapsed: result.elapsed||'',
+    group: result.group || '', lop: result.lop || '', truong: result.truong || ''
+  };
+  // Save to localStorage always as backup
+  try{ localStorage.setItem('result_'+EXAM_CODE+'_'+result.name, JSON.stringify(payload)); }catch(e){}
+
+  if(!GSHEET_URL && !GFORM_URL){
+    statusEl.innerHTML='<span style="color:#94a3b8;font-size:12px">💾 Đã lưu cục bộ (GV chưa cài URL nộp bài)</span>';
+    return;
+  }
+  statusEl.innerHTML='<span style="color:#2563eb;font-size:12px">⏳ Đang nộp kết quả...</span>';
+
+  var done = false;
+
+  // ── Phương thức 1: Apps Script với no-cors ─────────────────────
+  function tryAppsScript(){
+    if(!GSHEET_URL) return tryGoogleForm();
+    // no-cors: không đọc được response nhưng request VẪN đến server
+    fetch(GSHEET_URL, {
+      method: 'POST',
+      mode:   'no-cors',
+      body:   JSON.stringify(payload),
+      headers: {'Content-Type': 'text/plain'}
+    })
+    .then(function(){
+      // no-cors → response bị opaque, coi như thành công
+      if(!done){ done=true;
+        statusEl.innerHTML='<span style="color:#16a34a;font-size:12px">✅ Đã nộp vào Google Sheet!</span>';
+      }
+    })
+    .catch(function(){
+      tryGoogleForm(); // Thử Form nếu Script lỗi
+    });
+    // Sau 5s nếu chưa xác nhận → thử Form làm backup song song
+    setTimeout(function(){ if(!done) tryGoogleForm(); }, 5000);
+  }
+
+  // ── Phương thức 2: Google Form (no-cors, luôn hoạt động) ───────
+  function tryGoogleForm(){
+    if(!GFORM_URL || !GFORM_ENTRIES) {
+      if(!done) statusEl.innerHTML='<span style="color:#16a34a;font-size:12px">✅ Đã nộp! (xác nhận qua Apps Script)</span>';
+      return;
+    }
+    var entries = GFORM_ENTRIES.split(',').map(function(s){return s.trim();});
+    var vals = [EXAM_CODE + grpSuffix, result.name, result.lop||'', result.truong||'',
+                result.score, result.total,
+                String(result.nTN||0), result.nDS||'', String(result.nSA||0),
+                result.submitted_at, result.elapsed||''];
+    var body = entries.map(function(e,i){
+      return encodeURIComponent(e)+'='+encodeURIComponent(vals[i]!==undefined&&vals[i]!==null?vals[i]:'');
+    }).join('&');
+    fetch(GFORM_URL, {
+      method: 'POST',
+      mode:   'no-cors',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body:    body
+    })
+    .then(function(){
+      if(!done){ done=true;
+        statusEl.innerHTML='<span style="color:#16a34a;font-size:12px">✅ Đã nộp vào Google Sheet! (qua Form)</span>';
+      }
+    })
+    .catch(function(){
+      if(!done) statusEl.innerHTML='<span style="color:#ef4444;font-size:12px">⚠ Không gửi được mạng. Đã lưu cục bộ — chụp màn hình gửi GV.</span>';
+    });
+  }
+
+  tryAppsScript();
+}
+
+function pad(n){return String(Math.floor(n)).padStart(2,'0');}
+</script>
+<script>(function(){const KEY="exam_submits";const FILE_NAME="DE12BAI1_002.html";function increaseSubmit(){let s=JSON.parse(localStorage.getItem(KEY))||{};s[FILE_NAME]=(s[FILE_NAME]||0)+1;localStorage.setItem(KEY,JSON.stringify(s));alert("Đã ghi nhận lượt nộp bài!");}let btn=document.getElementById("submit-btn");if(btn)btn.addEventListener("click",increaseSubmit);else document.querySelectorAll("button,input[type=submit]").forEach(b=>{if(b.innerText.includes("Nộp")||b.value.includes("Nộp"))b.addEventListener("click",increaseSubmit);});})();</script>
+</body>
+</html>
