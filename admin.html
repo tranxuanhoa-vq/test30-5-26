@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản trị - Đề thi & Tài liệu (Môn + Lớp chuẩn)</title>
+    <title>Quản trị - Đề thi & Tài liệu (Môn + Lớp chuẩn) - Có khôi phục JSON</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: system-ui; max-width: 1200px; margin: 0 auto; padding: 20px; background: #f5f7fb; }
@@ -20,6 +20,7 @@
         .file-list { background: #f0f0f0; padding: 10px; border-radius: 8px; margin-top: 10px; }
         hr { margin: 20px 0; }
         .subject-select { max-height: 200px; overflow-y: auto; }
+        .flex-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
     </style>
 </head>
 <body>
@@ -36,8 +37,13 @@
 <div class="card">
     <h2>📋 Đề thi</h2>
     <div id="examList">Đang tải...</div>
-    <button id="refreshListBtn" style="background:#27ae60;">🔄 Làm mới</button>
-    <button id="downloadCurrentBtn" style="background:#2980b9;">💾 Tải exams.json</button>
+    <div class="flex-row" style="margin-top: 10px;">
+        <button id="refreshListBtn" style="background:#27ae60;">🔄 Làm mới từ server</button>
+        <button id="downloadCurrentBtn" style="background:#2980b9;">💾 Tải exams.json hiện tại</button>
+        <label style="background:#e0e0e0; padding: 5px 10px; border-radius: 8px; display: inline-flex; gap: 5px; align-items: center;">
+            📂 Nạp exams.json cũ: <input type="file" id="uploadExamsJson" accept=".json" style="width: auto;">
+        </label>
+    </div>
     <hr>
     <h3>➕ Thêm đề mới</h3>
     
@@ -77,8 +83,13 @@
 <div class="card">
     <h2>📚 Tài liệu học tập (PDF, DOCX) – Có Môn + Lớp</h2>
     <div id="docList">Đang tải...</div>
-    <button id="refreshDocsBtn" style="background:#27ae60;">🔄 Làm mới</button>
-    <button id="downloadDocsBtn" style="background:#2980b9;">💾 Tải docs.json</button>
+    <div class="flex-row" style="margin-top: 10px;">
+        <button id="refreshDocsBtn" style="background:#27ae60;">🔄 Làm mới từ server</button>
+        <button id="downloadDocsBtn" style="background:#2980b9;">💾 Tải docs.json hiện tại</button>
+        <label style="background:#e0e0e0; padding: 5px 10px; border-radius: 8px; display: inline-flex; gap: 5px; align-items: center;">
+            📂 Nạp docs.json cũ: <input type="file" id="uploadDocsJson" accept=".json" style="width: auto;">
+        </label>
+    </div>
     <hr>
     <h3>➕ Thêm tài liệu mới</h3>
     <label>Tiêu đề *</label><input type="text" id="docTitle" placeholder="VD: Đề cương giữa kỳ">
@@ -148,10 +159,23 @@
     function renderExamList(){
         let container=document.getElementById("examList");
         if(!currentExams.length){ container.innerHTML="<p>Chưa có đề.</p>"; return; }
-        let html=`<table><thead><tr><th>ID</th><th>Tiêu đề</th><th>Môn</th><th>Lớp</th><th>Tuần</th><th>Thời gian</th><th>Mở</th><th>Đóng</th><th>File</th><th>Xóa</th></tr></thead><tbody>`;
+        let html=`<table><thead>
+            <tr><th>ID</th><th>Tiêu đề</th><th>Môn</th><th>Lớp</th><th>Tuần</th><th>Thời gian</th><th>Mở</th><th>Đóng</th><th>File</th><th>Xóa</th></tr>
+        </thead><tbody>`;
         currentExams.forEach((ex,idx)=>{
             let timeStatus = ex.timeLimited===false ? "♾️ Không giới hạn" : "⏱️ Có hạn";
-            html+=`<tr><td>${ex.id}</td><td>${ex.title}</td><td>${ex.subject || 'Toán'}</td><td>${ex.grade}</td><td>${ex.week||''}</td><td>${timeStatus}</td><td>${ex.open||'—'}</td><td>${ex.close||'—'}</td><td>${ex.html}</td><td><button class="delExamBtn" data-idx="${idx}">🗑️</button></td></tr>`;
+            html+=`<tr>
+                <td>${ex.id}</td>
+                <td>${ex.title}</td>
+                <td>${ex.subject || 'Toán'}</td>
+                <td>${ex.grade}</td>
+                <td>${ex.week||''}</td>
+                <td>${timeStatus}</td>
+                <td>${ex.open||'—'}</td>
+                <td>${ex.close||'—'}</td>
+                <td>${ex.html}</td>
+                <td><button class="delExamBtn" data-idx="${idx}">🗑️</button></td>
+            </tr>`;
         });
         html+=`</tbody></table><p class="success">Tổng: ${currentExams.length} đề</p>`;
         container.innerHTML=html;
@@ -159,6 +183,24 @@
             btn.onclick=()=>{ if(confirm("Xóa đề?")){ currentExams.splice(parseInt(btn.dataset.idx),1); renderExamList(); } };
         });
     }
+    // Nạp exams.json từ file
+    document.getElementById("uploadExamsJson").onchange = (e) => {
+        let file = e.target.files[0];
+        if(!file) return;
+        let reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                let data = JSON.parse(ev.target.result);
+                if(Array.isArray(data)) {
+                    currentExams = data;
+                    renderExamList();
+                    alert(`Đã nạp ${data.length} đề. Lưu ý: dữ liệu cũ đã được thay thế hoàn toàn.`);
+                } else throw new Error();
+            } catch(err) { alert("File JSON không hợp lệ"); }
+        };
+        reader.readAsText(file);
+        e.target.value = "";
+    };
 
     // Docs
     async function loadDocs(){
@@ -172,9 +214,18 @@
     function renderDocList(){
         let container=document.getElementById("docList");
         if(!currentDocs.length){ container.innerHTML="<p>Chưa có tài liệu.</p>"; return; }
-        let html=`<table><thead><tr><th>Tiêu đề</th><th>Mô tả</th><th>Lớp</th><th>Môn</th><th>File</th><th>Xóa</th></tr></thead><tbody>`;
+        let html=`<table><thead>
+            <tr><th>Tiêu đề</th><th>Mô tả</th><th>Lớp</th><th>Môn</th><th>File</th><th>Xóa</th></tr>
+        </thead><tbody>`;
         currentDocs.forEach((doc,idx)=>{
-            html+=`<tr><td>${doc.title}</td><td>${doc.description||''}</td><td>${doc.grade||''}</td><td>${doc.subject||''}</td><td>${doc.file}</td><td><button class="delDocBtn" data-idx="${idx}">🗑️</button></td></tr>`;
+            html+=`<tr>
+                <td>${doc.title}</td>
+                <td>${doc.description||''}</td>
+                <td>${doc.grade||''}</td>
+                <td>${doc.subject||''}</td>
+                <td>${doc.file}</td>
+                <td><button class="delDocBtn" data-idx="${idx}">🗑️</button></td>
+            </tr>`;
         });
         html+=`</tbody></table><p class="success">Tổng: ${currentDocs.length} tài liệu</p>`;
         container.innerHTML=html;
@@ -182,8 +233,26 @@
             btn.onclick=()=>{ if(confirm("Xóa tài liệu?")){ currentDocs.splice(parseInt(btn.dataset.idx),1); renderDocList(); } };
         });
     }
+    // Nạp docs.json từ file
+    document.getElementById("uploadDocsJson").onchange = (e) => {
+        let file = e.target.files[0];
+        if(!file) return;
+        let reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                let data = JSON.parse(ev.target.result);
+                if(Array.isArray(data)) {
+                    currentDocs = data;
+                    renderDocList();
+                    alert(`Đã nạp ${data.length} tài liệu. Dữ liệu cũ đã được thay thế.`);
+                } else throw new Error();
+            } catch(err) { alert("File JSON không hợp lệ"); }
+        };
+        reader.readAsText(file);
+        e.target.value = "";
+    };
 
-    // Thêm đề
+    // Thêm đề (giữ nguyên)
     function injectSubmitScript(htmlContent, fileName){
         let script=`<script>(function(){const KEY="exam_submits";const FILE_NAME="${fileName.replace(/"/g,'\\"')}";function increaseSubmit(){let s=JSON.parse(localStorage.getItem(KEY))||{};s[FILE_NAME]=(s[FILE_NAME]||0)+1;localStorage.setItem(KEY,JSON.stringify(s));alert("Đã ghi nhận lượt nộp bài!");}let btn=document.getElementById("submit-btn");if(btn)btn.addEventListener("click",increaseSubmit);else document.querySelectorAll("button,input[type=submit]").forEach(b=>{if(b.innerText.includes("Nộp")||b.value.includes("Nộp"))b.addEventListener("click",increaseSubmit);});})();<\/script>`;
         return htmlContent.includes("</body>") ? htmlContent.replace("</body>",script+"\n</body>") : htmlContent+script;
@@ -234,7 +303,7 @@
         document.getElementById("htmlFiles").value=""; document.getElementById("selectedFilesList").innerHTML="";
     };
 
-    // Thêm tài liệu
+    // Thêm tài liệu (giữ nguyên)
     function updateDocGradeSelect(){
         let select=document.getElementById("docGrade");
         select.innerHTML='<option value="">-- Chọn lớp --</option>';
@@ -282,7 +351,7 @@
         else div.style.display="none";
     };
 
-    // Nút tải
+    // Các nút
     document.getElementById("refreshListBtn").onclick=loadExams;
     document.getElementById("downloadCurrentBtn").onclick=()=>{ let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(currentExams,null,2)],{type:"application/json"}));a.download="exams.json";a.click(); };
     document.getElementById("refreshDocsBtn").onclick=loadDocs;
